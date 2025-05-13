@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ edition }} - Vote{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+    .score-button {
+        transition: all 0.2s ease;
+    }
+    .score-button.active {
+        background-color: #4f46e5;
+        color: white;
+        transform: scale(1.1);
+    }
+    [x-cloak] { display: none !important; }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('voteApp', () => ({
+            pseudo: '',
+            team: '',
+            scores: {},
+            performances: {},
+            message: '',
+            messageType: '',
+            isLoading: false,
+            
+            init() {
+                // Vérifier si l'utilisateur est connecté
+                const userData = localStorage.getItem('eurovisionUser');
+                if (!userData) {
+                    // Rediriger vers la page de connexion si non connecté
+                    window.location.href = '{{ path('app_home') }}';
+                    return;
+                }
+                
+                const user = JSON.parse(userData);
+                this.pseudo = user.pseudo;
+                this.team = user.team;
+                
+                // Initialiser les performances
+                this.performances = {{ performances|json_encode|raw }};
+                
+                // Récupérer les votes existants
+                this.loadUserVotes();
+            },
+            
+            async loadUserVotes() {
+                this.isLoading = true;
+                
+                try {
+                    const response = await fetch(`{{ path('api_user_votes') }}?pseudo=${encodeURIComponent(this.pseudo)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.votes && data.votes.scores) {
+                        this.scores = data.votes.scores;
+                    } else {
+                        // Initialiser un objet scores vide
+                        this.scores = {};
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du chargement des votes:', error);
+                    this.showMessage('Erreur lors du chargement de vos votes', 'error');
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            
+            setScore(countryCode, score) {
+                this.scores[countryCode] = score;
+                this.saveVote(countryCode, score);
+            },
+            
+            getScore(countryCode) {
+                return this.scores[countryCode] || 0;
+            },
+            
+            isActive(countryCode, score) {
+                return this.getScore(countryCode) === score;
+            },
+            
+            async saveVote(countryCode, score) {
+                // Sauvegarder localement d'abord
+                localStorage.setItem('eurovisionVotes', JSON.stringify(this.scores));
+                
+                try {
+                    const response = await fetch('{{ path('api_vote') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            pseudo: this.pseudo,
+                            team: this.team,
+                            scores: { [countryCode]: score }
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        this.showMessage('Vote enregistré !', 'success');
+                    } else {
+                        this.showMessage(data.message || 'Erreur lors de l\'enregistrement du vote', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de l\'enregistrement du vote:', error);
+                    this.showMessage('Erreur lors de l\'enregistrement du vote', 'error');
+                }
+            },
+            
+            showMessage(message, type = 'info') {
+                this.message = message;
+                this.messageType = type;
+                
+                // Masquer le message après quelques secondes
+                setTimeout(() => {
+                    this.message = '';
+                }, 3000);
+            },
+            
+            disconnectUser() {
+                // Conserver les votes mais déconnecter l'utilisateur
+                localStorage.removeItem('eurovisionUser');
+                window.location.href = '{{ path('app_home') }}';
+            }
+        }));
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-gray-100" x-data="voteApp" x-cloak>
+    <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-900">
+                {{ edition }}
+            </h1>
+            <div class="flex items-center">
+                <span class="mr-4 text-gray-700">
+                    <span x-text="pseudo"></span> | <span x-text="team"></span>
+                </span>
+                <button @click="disconnectUser" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">
+                    Déconnexion
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div x-show="message" :class="{'bg-green-50 border-green-400': messageType === 'success', 'bg-red-50 border-red-400': messageType === 'error', 'bg-blue-50 border-blue-400': messageType === 'info'}" class="mb-4 border-l-4 p-4 transition-all duration-300">
+            <div class="flex">
+                <div class="ml-3">
+                    <p x-text="message" :class="{'text-green-700': messageType === 'success', 'text-red-700': messageType === 'error', 'text-blue-700': messageType === 'info'}" class="text-sm"></p>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="isLoading" class="flex justify-center py-8">
+            <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" x-show="!isLoading">
+            <template x-for="(performance, countryCode) in performances" :key="countryCode">
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-2" x-text="performance.flag"></span>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" x-text="performance.name"></h3>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500" x-text="performance.artist"></p>
+                            <p class="text-sm font-medium text-gray-700" x-text="performance.song"></p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700">Votre note</label>
+                            <div class="mt-1 flex space-x-1">
+                                <template x-for="n in 11" :key="n-1">
+                                    <button 
+                                        @click="setScore(countryCode, n-1)" 
+                                        :class="{'active': isActive(countryCode, n-1)}" 
+                                        class="score-button w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md focus:outline-none hover:bg-gray-50">
+                                        <span x-text="n-1"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </main>
+</div>
+{% endblock %}

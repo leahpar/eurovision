@@ -1,0 +1,258 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ edition }} - Résultats{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+    .gold { background-color: #FFD700; }
+    .silver { background-color: #C0C0C0; }
+    .bronze { background-color: #CD7F32; }
+    [x-cloak] { display: none !important; }
+    
+    @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+    }
+    
+    .animate-pulse {
+        animation: pulse 1.5s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('resultsApp', () => ({
+            edition: '{{ edition }}',
+            teams: {{ teams|json_encode|raw }},
+            selectedTeam: '',
+            ranking: [],
+            stats: {},
+            teamsStats: [],
+            loading: true,
+            error: '',
+            
+            init() {
+                this.loadResults();
+                this.loadTeamsStats();
+                
+                // Auto-refresh des résultats toutes les 30 secondes
+                setInterval(() => {
+                    this.loadResults();
+                    this.loadTeamsStats();
+                }, 30000);
+            },
+            
+            async loadResults() {
+                this.loading = true;
+                this.error = '';
+                
+                try {
+                    let url = '{{ path('api_results') }}';
+                    if (this.selectedTeam) {
+                        url += `?team=${encodeURIComponent(this.selectedTeam)}`;
+                    }
+                    
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.ranking = data.ranking;
+                        this.stats = data.stats;
+                    } else {
+                        this.error = data.message || 'Erreur lors du chargement des résultats';
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    this.error = 'Erreur de connexion au serveur';
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async loadTeamsStats() {
+                try {
+                    const response = await fetch('{{ path('api_teams_stats') }}');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.teamsStats = data.teams;
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du chargement des stats par équipe:', error);
+                }
+            },
+            
+            selectTeam(team) {
+                this.selectedTeam = team === this.selectedTeam ? '' : team;
+                this.loadResults();
+            },
+            
+            getRankClass(rank) {
+                if (rank === 1) return 'gold text-yellow-800';
+                if (rank === 2) return 'silver text-gray-800';
+                if (rank === 3) return 'bronze text-yellow-900';
+                return '';
+            },
+            
+            formatScore(score) {
+                return score.toFixed(1);
+            }
+        }));
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-gray-100" x-data="resultsApp" x-cloak>
+    <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-bold text-gray-900 text-center">
+                {{ edition }} - Résultats
+            </h1>
+            <p class="text-sm text-center text-gray-500 mt-1">
+                Les résultats se rafraîchissent automatiquement toutes les 30 secondes
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Filtres par équipe -->
+        <div class="mb-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">Filtrer par équipe</h2>
+            <div class="flex flex-wrap gap-2">
+                <button 
+                    @click="selectTeam('')" 
+                    :class="{'bg-indigo-600 text-white': selectedTeam === '', 'bg-gray-200 text-gray-800': selectedTeam !== ''}" 
+                    class="px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                    Tous
+                </button>
+                <template x-for="team in teams" :key="team">
+                    <button 
+                        @click="selectTeam(team)" 
+                        :class="{'bg-indigo-600 text-white': selectedTeam === team, 'bg-gray-200 text-gray-800': selectedTeam !== team}" 
+                        class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                        x-text="team">
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div x-show="loading" class="flex justify-center py-8">
+            <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <!-- Message d'erreur -->
+        <div x-show="error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+            <div class="flex">
+                <div class="ml-3">
+                    <p class="text-sm text-red-700" x-text="error"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistiques -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" x-show="!loading && !error">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm text-gray-500">Participants</h3>
+                <p class="text-3xl font-bold" x-text="stats.totalVoters || 0"></p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm text-gray-500">Votes au total</h3>
+                <p class="text-3xl font-bold" x-text="stats.totalVotes || 0"></p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm text-gray-500">Meilleure note</h3>
+                <p class="text-3xl font-bold" x-text="formatScore(stats.highestScore || 0)"></p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm text-gray-500">Note la plus basse</h3>
+                <p class="text-3xl font-bold" x-text="stats.lowestScore !== undefined && stats.lowestScore < 10 ? formatScore(stats.lowestScore) : '-'"></p>
+            </div>
+        </div>
+        
+        <!-- Stats par équipe -->
+        <div class="mb-6" x-show="!loading && !error && selectedTeam === ''">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">Statistiques par équipe</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <template x-for="teamStat in teamsStats" :key="teamStat.name">
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-bold text-gray-800" x-text="teamStat.name"></h3>
+                        <div class="mt-2 space-y-1">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">Participants</span>
+                                <span class="font-medium" x-text="teamStat.totalVoters"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">Votes</span>
+                                <span class="font-medium" x-text="teamStat.totalVotes"></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Tableau de classement -->
+        <div x-show="!loading && !error">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">
+                <span x-show="!selectedTeam">Classement général</span>
+                <span x-show="selectedTeam">Classement de <span x-text="selectedTeam"></span></span>
+            </h2>
+            
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rang</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pays</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artiste</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chanson</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Votes</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="entry in ranking" :key="entry.countryCode">
+                            <tr :class="getRankClass(entry.rank)">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-lg font-bold" x-text="entry.rank"></span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-2xl mr-2" x-text="entry.flag"></span>
+                                        <span x-text="entry.name"></span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="entry.artist"></td>
+                                <td class="px-6 py-4 whitespace-nowrap" x-text="entry.song"></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-sm font-medium bg-gray-100 rounded" x-text="formatScore(entry.averageScore)"></span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="entry.totalVotes"></td>
+                            </tr>
+                        </template>
+                        <tr x-show="ranking.length === 0">
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                <span x-show="selectedTeam">Aucun vote pour cette équipe</span>
+                                <span x-show="!selectedTeam">Aucun vote enregistré</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
