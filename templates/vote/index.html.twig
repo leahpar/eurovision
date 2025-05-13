@@ -133,7 +133,7 @@
 {% endblock %}
 
 {% block body %}
-<div x-data="voteApp" x-cloak>
+<div x-data="voteApp" x-cloak class="px-1 sm:px-2">
     <!-- Message de notification -->
     <div x-show="message" 
          :class="{
@@ -154,33 +154,32 @@
     </div>
 
     <!-- Grid de pays -->
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" x-show="!isLoading">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" x-show="!isLoading">
         <template x-for="(performance, countryCode) in performances" :key="countryCode">
             <div :class="{'bg-white': getScore(countryCode) > 0, 'bg-gray-100 border-2 border-dashed border-gray-300': getScore(countryCode) === 0}" 
                 class="overflow-hidden shadow rounded-lg hover:shadow-lg transition-all vote-card relative">
-                <div class="px-4 py-5 sm:p-6">
-                    <div class="flex items-center">
-                        <span class="text-5xl mr-4" x-text="performance.flag"></span>
-                        <div>
-                            <h3 class="text-lg leading-6 font-bold text-gray-900" x-text="performance.name"></h3>
-                            <span x-show="getScore(countryCode) === 0" class="inline-block mt-1 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
-                                Non noté
-                            </span>
+                <div class="px-3 py-3 sm:p-4">
+                    <div class="flex">
+                        <span class="text-5xl mr-3 flex-shrink-0" x-text="performance.flag"></span>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg leading-6 font-bold text-gray-900 truncate" x-text="performance.name"></h3>
+                                <span x-show="getScore(countryCode) === 0" class="inline-block ml-2 px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                    Non noté
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate" x-text="performance.artist"></p>
+                            <p class="text-sm font-medium text-gray-700 truncate" x-text="performance.song"></p>
                         </div>
                     </div>
-                    <div class="mt-3 border-t pt-3">
-                        <p class="text-sm text-gray-500" x-text="performance.artist"></p>
-                        <p class="text-sm font-medium text-gray-700" x-text="performance.song"></p>
-                    </div>
                     
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700">Votre note</label>
-                        <div class="mt-2 flex overflow-x-auto whitespace-nowrap py-1 px-1">
+                    <div class="mt-3">
+                        <div class="grid grid-cols-11 gap-1">
                             <template x-for="n in 11" :key="n-1">
                                 <button 
                                     @click="setScore(countryCode, n-1)" 
                                     :class="{'active': isActive(countryCode, n-1), 'bg-indigo-50': n-1 % 2 === 0 && !isActive(countryCode, n-1)}" 
-                                    class="score-button min-w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md focus:outline-none hover:bg-gray-100 mx-1">
+                                    class="score-button h-8 flex items-center justify-center border border-gray-300 rounded-md focus:outline-none hover:bg-gray-100">
                                     <span x-text="n-1"></span>
                                 </button>
                             </template>
