@@ -27,9 +27,8 @@ jobs:
                   ssh -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
                     "cd ${{ vars.WORK_DIR }}/ \
                      && git pull \
-                     && composer install --no-interaction --no-scripts \
-                     && php bin/console d:m:m --no-interaction --allow-no-migration \
                      && rm -rf var/cache/* 2>/dev/null \
+                     && composer install --no-interaction --no-scripts \
                      && exit"
                   echo "Deployment completed."
             - name: cleanup SSH key
