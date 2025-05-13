@@ -67,3 +67,8 @@ Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation 
   - [x] Drapeau plus visible
   - [x] Noms de la chanson et de l'artiste sur la même ligne
   - [x] Utilise plus la largeur de l'écran
+
+### Page d'admin
+- [ ] Nouvelle page "/admin" publique, simple
+- [ ] Bouton "Reset votes" pour vider le fichier de votes
+- [ ] Liste des joueurs avec de quoi les supprimer

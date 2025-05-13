@@ -1,0 +1,147 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration - {{ edition }}{% endblock %}
+
+{% block header_title %}Administration{% endblock %}
+
+{% block body %}
+<div class="container mx-auto py-4" x-data="adminApp()">
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-2xl font-bold mb-4">Réinitialisation des votes</h2>
+        <p class="mb-4 text-gray-700">Cette action supprimera définitivement tous les votes enregistrés. Cette action est irréversible.</p>
+        
+        <button @click="confirmResetVotes" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" :disabled="processing">
+            <span x-show="!processing">Réinitialiser tous les votes</span>
+            <span x-show="processing">Traitement en cours...</span>
+        </button>
+        
+        <div x-show="message" class="mt-4 p-3" :class="{'bg-green-100 text-green-700': success, 'bg-red-100 text-red-700': !success}">
+            <p x-text="message"></p>
+        </div>
+    </div>
+    
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-4">Liste des joueurs</h2>
+        
+        <div x-show="Object.keys(votes).length === 0" class="p-4 text-gray-700 bg-gray-100 rounded">
+            Aucun joueur n'a encore voté.
+        </div>
+        
+        <div x-show="Object.keys(votes).length > 0" class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b text-left">Pseudo</th>
+                        <th class="py-2 px-4 border-b text-left">Équipe</th>
+                        <th class="py-2 px-4 border-b text-left">Nombre de votes</th>
+                        <th class="py-2 px-4 border-b text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="(userData, pseudo) in votes" :key="pseudo">
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 px-4 border-b" x-text="pseudo"></td>
+                            <td class="py-2 px-4 border-b" x-text="userData.team"></td>
+                            <td class="py-2 px-4 border-b" x-text="Object.keys(userData.scores || {}).length"></td>
+                            <td class="py-2 px-4 border-b">
+                                <button @click="confirmDeletePlayer(pseudo)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                                    Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function adminApp() {
+            return {
+                votes: {{ votes|json_encode|raw }},
+                processing: false,
+                message: '',
+                success: false,
+                
+                confirmResetVotes() {
+                    if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les votes ? Cette action est irréversible.')) {
+                        this.resetVotes();
+                    }
+                },
+                
+                resetVotes() {
+                    this.processing = true;
+                    this.message = '';
+                    
+                    fetch('/api/admin/reset-votes', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.success = data.success;
+                        this.message = data.message;
+                        
+                        if (data.success) {
+                            // Vider la liste des votes si réinitialisation réussie
+                            this.votes = {};
+                        }
+                    })
+                    .catch(error => {
+                        this.success = false;
+                        this.message = 'Erreur de connexion au serveur.';
+                        console.error('Erreur:', error);
+                    })
+                    .finally(() => {
+                        this.processing = false;
+                    });
+                },
+                
+                confirmDeletePlayer(pseudo) {
+                    if (confirm(`Êtes-vous sûr de vouloir supprimer le joueur "${pseudo}" ? Cette action est irréversible.`)) {
+                        this.deletePlayer(pseudo);
+                    }
+                },
+                
+                deletePlayer(pseudo) {
+                    this.processing = true;
+                    this.message = '';
+                    
+                    fetch(`/api/admin/delete-player/${encodeURIComponent(pseudo)}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.success = data.success;
+                        this.message = data.message;
+                        
+                        if (data.success) {
+                            // Supprimer le joueur de la liste locale
+                            const updatedVotes = {...this.votes};
+                            delete updatedVotes[pseudo];
+                            this.votes = updatedVotes;
+                        }
+                    })
+                    .catch(error => {
+                        this.success = false;
+                        this.message = 'Erreur de connexion au serveur.';
+                        console.error('Erreur:', error);
+                    })
+                    .finally(() => {
+                        this.processing = false;
+                    });
+                }
+            };
+        }
+    </script>
+{% endblock %}
