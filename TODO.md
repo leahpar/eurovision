@@ -69,6 +69,6 @@ Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation 
   - [x] Utilise plus la largeur de l'écran
 
 ### Page d'admin
-- [ ] Nouvelle page "/admin" publique, simple
-- [ ] Bouton "Reset votes" pour vider le fichier de votes
-- [ ] Liste des joueurs avec de quoi les supprimer
+- [x] Nouvelle page "/admin" publique, simple
+- [x] Bouton "Reset votes" pour vider le fichier de votes
+- [x] Liste des joueurs avec de quoi les supprimer

@@ -154,6 +154,16 @@ src/
 - Affichage des moyennes et classements par pays
 - Possibilité de filtrer/grouper par équipe
 
+## Workflow admin
+
+### Page admin dédiée
+
+- URL `/admin`
+- Basic auth
+- Gestion des utilisateurs (suppression, renommage)
+- Gestion des équipes (ajout/modification/suppression)
+- Reset des votes (vider le fichier JSON)
+
 ## Flux technique
 ```
 Joueur mobile -> Vote -> Serveur (JSON) -> Écran résultats (auto-refresh)
@@ -165,5 +175,6 @@ LocalStorage   Pas de session              Calculs moyennes
 
 - **Interface joueur** : focus mobile, affichage minimal (ses votes uniquement)
 - **Interface résultats** : focus grand écran, vue d'ensemble enrichie
-- **Pas de mélange** : pas de redirection entre les deux interfaces
+- **Interface admin** : page publique pour reset votes, gestion des utilisateurs, gestion des équipes
+- **Pas de mélange** : pas de redirection entre les interfaces
 

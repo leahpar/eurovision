@@ -6,6 +6,7 @@ use App\Service\ConfigService;
 use App\Service\VoteService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -23,10 +24,12 @@ class AdminController extends AbstractController
         // Récupérer les votes pour afficher la liste des joueurs
         $votes = $this->voteService->getAllVotes();
         $edition = $this->configService->getEdition();
+        $teams = $this->configService->getTeams();
         
         return $this->render('admin/index.html.twig', [
             'edition' => $edition,
             'votes' => $votes,
+            'teams' => $teams,
         ]);
     }
 
@@ -59,6 +62,52 @@ class AdminController extends AbstractController
         }
     }
 
+    #[Route('/api/admin/update-player/{oldPseudo}', name: 'api_admin_update_player', methods: ['POST'])]
+    public function updatePlayer(Request $request, string $oldPseudo): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $newPseudo = $data['newPseudo'] ?? '';
+            $team = $data['team'] ?? '';
+            
+            // Validation basique
+            if (empty($newPseudo) || empty($team)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Le pseudo et l\'équipe sont obligatoires'
+                ], 400);
+            }
+            
+            // Validation de l'équipe
+            $validTeams = $this->configService->getTeams();
+            if (!in_array($team, $validTeams, true)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => sprintf('L\'équipe "%s" n\'est pas valide.', $team)
+                ], 400);
+            }
+            
+            $result = $this->updatePlayerInService($oldPseudo, $newPseudo, $team);
+            
+            if ($result) {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'Les informations du joueur ont été mises à jour avec succès.'
+                ]);
+            } else {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Erreur lors de la mise à jour du joueur.'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
     #[Route('/api/admin/delete-player/{pseudo}', name: 'api_admin_delete_player', methods: ['DELETE'])]
     public function deletePlayer(string $pseudo): JsonResponse
     {
@@ -97,6 +146,57 @@ class AdminController extends AbstractController
         $emptyVotes = ['votes' => []];
         $content = json_encode($emptyVotes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         
+        return file_put_contents($votesFilePath, $content) !== false;
+    }
+
+    /**
+     * Met à jour les informations d'un joueur.
+     * Cette méthode est séparée pour faciliter les tests unitaires.
+     */
+    private function updatePlayerInService(string $oldPseudo, string $newPseudo, string $team): bool
+    {
+        // Charger les votes actuels
+        $votes = $this->voteService->getAllVotes();
+        
+        // Vérifier si le joueur existe
+        if (!isset($votes[$oldPseudo])) {
+            throw new \InvalidArgumentException(sprintf('Le joueur "%s" n\'existe pas.', $oldPseudo));
+        }
+        
+        // Si le pseudo a changé, vérifier que le nouveau n'existe pas déjà (sauf s'il s'agit du même joueur)
+        if ($oldPseudo !== $newPseudo && isset($votes[$newPseudo])) {
+            throw new \InvalidArgumentException(sprintf('Le pseudo "%s" est déjà utilisé par un autre joueur.', $newPseudo));
+        }
+        
+        // Lire le fichier directement (comme dans deletePlayerInService)
+        $votesFilePath = $this->getParameter('kernel.project_dir') . '/var/storage/votes.json';
+        
+        $votesContent = file_get_contents($votesFilePath);
+        if ($votesContent === false) {
+            throw new \RuntimeException('Impossible de lire le fichier de votes.');
+        }
+        
+        $votesData = json_decode($votesContent, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException('Le fichier de votes n\'est pas un JSON valide: ' . json_last_error_msg());
+        }
+        
+        // Récupérer les données du joueur
+        $playerData = $votesData['votes'][$oldPseudo];
+        
+        // Mettre à jour l'équipe
+        $playerData['team'] = $team;
+        
+        // Si le pseudo a changé, supprimer l'ancien et créer le nouveau
+        if ($oldPseudo !== $newPseudo) {
+            unset($votesData['votes'][$oldPseudo]);
+        }
+        
+        // Ajouter ou mettre à jour les données du joueur avec le nouveau pseudo
+        $votesData['votes'][$newPseudo] = $playerData;
+        
+        // Enregistrer le fichier mis à jour
+        $content = json_encode($votesData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         return file_put_contents($votesFilePath, $content) !== false;
     }
 

@@ -40,11 +40,28 @@
                 <tbody>
                     <template x-for="(userData, pseudo) in votes" :key="pseudo">
                         <tr class="hover:bg-gray-50">
-                            <td class="py-2 px-4 border-b" x-text="pseudo"></td>
-                            <td class="py-2 px-4 border-b" x-text="userData.team"></td>
+                            <td class="py-2 px-4 border-b">
+                                <input type="text" 
+                                       :value="pseudo" 
+                                       class="w-full border rounded py-1 px-2" 
+                                       @change="updatePlayer(pseudo, $event.target.value, userData.team)"
+                                       :disabled="processing">
+                            </td>
+                            <td class="py-2 px-4 border-b">
+                                <select class="w-full border rounded py-1 px-2" 
+                                        :value="userData.team" 
+                                        @change="updatePlayer(pseudo, pseudo, $event.target.value)"
+                                        :disabled="processing">
+                                    <template x-for="team in teams" :key="team">
+                                        <option :value="team" :selected="team === userData.team" x-text="team"></option>
+                                    </template>
+                                </select>
+                            </td>
                             <td class="py-2 px-4 border-b" x-text="Object.keys(userData.scores || {}).length"></td>
                             <td class="py-2 px-4 border-b">
-                                <button @click="confirmDeletePlayer(pseudo)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                                <button @click="confirmDeletePlayer(pseudo)" 
+                                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                        :disabled="processing">
                                     Supprimer
                                 </button>
                             </td>
@@ -63,6 +80,8 @@
         function adminApp() {
             return {
                 votes: {{ votes|json_encode|raw }},
+                teams: {{ teams|json_encode|raw }},
+                editingPlayer: null,
                 processing: false,
                 message: '',
                 success: false,
@@ -129,6 +148,60 @@
                             // Supprimer le joueur de la liste locale
                             const updatedVotes = {...this.votes};
                             delete updatedVotes[pseudo];
+                            this.votes = updatedVotes;
+                        }
+                    })
+                    .catch(error => {
+                        this.success = false;
+                        this.message = 'Erreur de connexion au serveur.';
+                        console.error('Erreur:', error);
+                    })
+                    .finally(() => {
+                        this.processing = false;
+                    });
+                },
+                
+                updatePlayer(oldPseudo, newPseudo, team) {
+                    // Éviter les updates inutiles
+                    if (oldPseudo === newPseudo && this.votes[oldPseudo].team === team) {
+                        return;
+                    }
+                    
+                    this.processing = true;
+                    this.message = '';
+                    
+                    fetch(`/api/admin/update-player/${encodeURIComponent(oldPseudo)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            newPseudo: newPseudo,
+                            team: team
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.success = data.success;
+                        this.message = data.message;
+                        
+                        if (data.success) {
+                            // Mettre à jour le joueur dans la liste locale
+                            const updatedVotes = {...this.votes};
+                            
+                            // Si le pseudo a changé, supprimer l'ancien et créer un nouveau
+                            if (oldPseudo !== newPseudo) {
+                                const userData = {...updatedVotes[oldPseudo]};
+                                userData.team = team;
+                                
+                                delete updatedVotes[oldPseudo];
+                                updatedVotes[newPseudo] = userData;
+                            } else {
+                                // Sinon, juste mettre à jour l'équipe
+                                updatedVotes[oldPseudo].team = team;
+                            }
+                            
                             this.votes = updatedVotes;
                         }
                     })
