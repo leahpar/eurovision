@@ -36,12 +36,21 @@ Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation 
 9. [x] **Responsive design** : Focus mobile/tactile
 
 ## Finitions
-1. [ ] **CSS/Design** : Cohérence visuelle entre pages
-2. [ ] **Favicon/Meta** : Tags HTML appropriés + PWA
-3. [ ] **Documentation** : README avec instructions
+1. [x] **CSS/Design** : Cohérence visuelle entre pages
+2. [x] **Favicon/Meta** : Tags HTML appropriés + PWA
+3. [x] **Documentation** : README avec instructions
 
-## Déploiement
-1. [ ] **Config prod** : Variables environnement
-2. [ ] **Permissions** : Fichiers storage en écriture
-3. [ ] **Test déployé** : Vérification environnement final
-4. [ ] **Backup strategy** : Sauvegarde votes.json
+## Retours clients
+
+### Divers
+- [ ] Readme.md => Ajouter un disclaimer indiquant que tout le code a été écrit par Claude, que le développement de ce projet a pour but de jouer avec les LLM
+
+### Page de résultats
+- [ ] Supprimer l'entête de la page
+- [ ] Refresh automatique toutes les 10 secondes
+- [ ] Ajouter un bouton de refresh manuel
+
+### Page de votes
+- [ ] Trier les pays par ordre alphabétique
+- [ ] Enlever le bouton de déconnexion
+- [ ] Distinguer visuellement les pays non notés
