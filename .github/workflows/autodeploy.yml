@@ -28,7 +28,7 @@ jobs:
                     "cd ${{ vars.WORK_DIR }}/ \
                      && git pull \
                      && rm -rf var/cache/* 2>/dev/null \
-                     && composer install --no-interaction --no-scripts \
+                     && composer install --no-dev --no-interaction \
                      && exit"
                   echo "Deployment completed."
             - name: cleanup SSH key
