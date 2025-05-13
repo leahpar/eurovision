@@ -41,39 +41,22 @@ class VoteController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         
-        $pseudo = $data['pseudo'] ?? '';
-        $team = $data['team'] ?? '';
         $scores = $data['scores'] ?? [];
         $userId = $data['userId'] ?? null;
         
         // Validation basique
-        if (empty($pseudo) || empty($team) || empty($scores)) {
+        if (empty($scores) || empty($userId)) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'Pseudo, équipe et scores sont obligatoires'
+                'message' => 'Scores et userId obligatoires'
             ], 400);
         }
         
         try {
-            // Si un userId est fourni mais le pseudo ou l'équipe ne correspond pas, c'est qu'il y a eu un changement
-            if ($userId !== null) {
-                $userInfo = $this->voteService->getUserByUserId($userId);
-                
-                if ($userInfo !== null) {
-                    // Si l'ID est valide mais le pseudo a changé, mettre à jour l'ancien pseudo
-                    if ($userInfo['userData']['pseudo'] !== $pseudo) {
-                        // Le pseudo a été changé par l'admin - utiliser le nouveau pseudo mais conserver l'ID
-                        $pseudo = $userInfo['userData']['pseudo'];
-                    }
-                    
-                    // Si l'ID est valide mais l'équipe a changé, mettre à jour l'ancienne équipe
-                    if ($userInfo['userData']['team'] !== $team) {
-                        // L'équipe a été changée par l'admin - utiliser la nouvelle équipe mais conserver l'ID
-                        $team = $userInfo['userData']['team'];
-                    }
-                }
-            }
-            
+            $userInfo = $this->voteService->getUserByUserId($userId);
+            $pseudo = $userInfo['userData']['pseudo'];
+            $team = $userInfo['userData']['team'];
+
             // Enregistrer les votes
             $result = $this->voteService->saveUserVotes($pseudo, $team, $scores, $userId);
             
