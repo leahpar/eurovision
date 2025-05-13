@@ -1,0 +1,11 @@
+security:
+    password_hashers:
+        # Pour l'environnement de développement, utiliser le plaintext pour simplifier
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'plaintext'
+        
+    # Définir l'utilisateur directement dans ce fichier pour l'environnement de développement
+    providers:
+        admin_users:
+            memory:
+                users:
+                    admin: { password: 'eurovision2025', roles: ['ROLE_ADMIN'] }
