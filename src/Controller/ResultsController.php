@@ -63,6 +63,43 @@ class ResultsController extends AbstractController
                 $stats['totalVotes'] += $data['totalVotes'];
             }
             
+            // Calculer les statistiques supplémentaires
+            $highestScore = 0;
+            $lowestScore = 10;
+            
+            foreach ($ranking as $data) {
+                if ($data['averageScore'] > $highestScore) {
+                    $highestScore = $data['averageScore'];
+                }
+                if ($data['totalVotes'] > 0 && $data['averageScore'] < $lowestScore) {
+                    $lowestScore = $data['averageScore'];
+                }
+            }
+            
+            $stats['highestScore'] = $highestScore;
+            $stats['lowestScore'] = $lowestScore;
+            
+            // Fun stats
+            $harshestVoter = $this->voteService->getHarshestVoter();
+            if ($harshestVoter) {
+                $stats['harshestVoter'] = $harshestVoter;
+            }
+            
+            $generousVoter = $this->voteService->getGenerousVoter();
+            if ($generousVoter) {
+                $stats['generousVoter'] = $generousVoter;
+            }
+            
+            $divisiveCountry = $this->voteService->getMostDivisiveCountry();
+            if ($divisiveCountry) {
+                $stats['divisiveCountry'] = $divisiveCountry;
+            }
+            
+            $consensualCountry = $this->voteService->getMostConsensualCountry();
+            if ($consensualCountry) {
+                $stats['consensualCountry'] = $consensualCountry;
+            }
+            
             return new JsonResponse([
                 'success' => true,
                 'ranking' => array_values($ranking),

@@ -75,12 +75,9 @@ class VoteService
             }
 
             // Score doit être un entier entre 0 et 10
-            if (!is_numeric($score) || intval($score) != $score || $score < 0 || $score > 10) {
+            if (!is_int($score) || $score < 0 || $score > 10) {
                 throw new \InvalidArgumentException(sprintf('Le score pour le pays "%s" doit être un entier entre 0 et 10.', $countryCode));
             }
-            
-            // Conversion explicite en entier
-            $scores[$countryCode] = (int) $score;
         }
 
         // Chargement des votes existants
@@ -216,6 +213,256 @@ class VoteService
         });
 
         return $ranking;
+    }
+
+    /**
+     * Identifie le joueur le plus sévère (moyenne de votes la plus basse)
+     * 
+     * @return array{pseudo: string, team: string, averageScore: float}|null
+     */
+    public function getHarshestVoter(): ?array
+    {
+        $votes = $this->getAllVotes();
+        if (empty($votes)) {
+            return null;
+        }
+        
+        $voterScores = [];
+        
+        foreach ($votes as $pseudo => $userData) {
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || empty($userData['scores'])) {
+                continue;
+            }
+            
+            $totalScore = 0;
+            $voteCount = count($userData['scores']);
+            
+            foreach ($userData['scores'] as $score) {
+                $totalScore += $score;
+            }
+            
+            $voterScores[$pseudo] = [
+                'pseudo' => $pseudo,
+                'team' => $userData['team'] ?? 'Inconnue',
+                'averageScore' => $totalScore / $voteCount
+            ];
+        }
+        
+        if (empty($voterScores)) {
+            return null;
+        }
+        
+        // Tri par moyenne croissante
+        uasort($voterScores, function ($a, $b) {
+            return $a['averageScore'] <=> $b['averageScore'];
+        });
+        
+        // Retourne le joueur avec la moyenne la plus basse
+        return reset($voterScores);
+    }
+    
+    /**
+     * Identifie le joueur le plus généreux (moyenne de votes la plus haute)
+     * 
+     * @return array{pseudo: string, team: string, averageScore: float}|null
+     */
+    public function getGenerousVoter(): ?array
+    {
+        $votes = $this->getAllVotes();
+        if (empty($votes)) {
+            return null;
+        }
+        
+        $voterScores = [];
+        
+        foreach ($votes as $pseudo => $userData) {
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || empty($userData['scores'])) {
+                continue;
+            }
+            
+            $totalScore = 0;
+            $voteCount = count($userData['scores']);
+            
+            foreach ($userData['scores'] as $score) {
+                $totalScore += $score;
+            }
+            
+            $voterScores[$pseudo] = [
+                'pseudo' => $pseudo,
+                'team' => $userData['team'] ?? 'Inconnue',
+                'averageScore' => $totalScore / $voteCount
+            ];
+        }
+        
+        if (empty($voterScores)) {
+            return null;
+        }
+        
+        // Tri par moyenne décroissante
+        uasort($voterScores, function ($a, $b) {
+            return $b['averageScore'] <=> $a['averageScore'];
+        });
+        
+        // Retourne le joueur avec la moyenne la plus haute
+        return reset($voterScores);
+    }
+    
+    /**
+     * Identifie le pays le plus clivant (écart-type des scores le plus élevé)
+     * 
+     * @return array{countryCode: string, name: string, flag: string, stdDeviation: float}|null
+     */
+    public function getMostDivisiveCountry(): ?array
+    {
+        $votes = $this->getAllVotes();
+        $performances = $this->configService->getPerformances();
+        
+        if (empty($votes) || empty($performances)) {
+            return null;
+        }
+        
+        /** @var array<string, array{scores: list<int>, countryCode: string, name: string, flag: string}> $countryScores */
+        $countryScores = [];
+        
+        // Initialiser les tableaux de scores pour chaque pays
+        foreach ($performances as $countryCode => $performance) {
+            $countryScores[$countryCode] = [
+                'scores' => [],
+                'countryCode' => $countryCode,
+                'name' => $performance['name'],
+                'flag' => $performance['flag']
+            ];
+        }
+        
+        // Collecter tous les scores par pays
+        foreach ($votes as $userData) {
+            if (!isset($userData['scores']) || !is_array($userData['scores'])) {
+                continue;
+            }
+            
+            foreach ($userData['scores'] as $countryCode => $score) {
+                if (isset($countryScores[$countryCode])) {
+                    $countryScores[$countryCode]['scores'][] = $score;
+                }
+            }
+        }
+        
+        $divisiveCountries = [];
+        
+        // Calculer l'écart-type pour chaque pays
+        foreach ($countryScores as $countryCode => $data) {
+            if (count($data['scores']) < 2) {
+                continue;
+            }
+            
+            $mean = array_sum($data['scores']) / count($data['scores']);
+            $variance = 0;
+            
+            foreach ($data['scores'] as $score) {
+                $variance += pow($score - $mean, 2);
+            }
+            
+            $variance /= count($data['scores']);
+            $stdDeviation = sqrt($variance);
+            
+            $divisiveCountries[$countryCode] = [
+                'countryCode' => $countryCode,
+                'name' => $data['name'],
+                'flag' => $data['flag'],
+                'stdDeviation' => $stdDeviation
+            ];
+        }
+        
+        if (empty($divisiveCountries)) {
+            return null;
+        }
+        
+        // Tri par écart-type décroissant
+        uasort($divisiveCountries, function ($a, $b) {
+            return $b['stdDeviation'] <=> $a['stdDeviation'];
+        });
+        
+        // Retourne le pays avec l'écart-type le plus élevé
+        return reset($divisiveCountries);
+    }
+    
+    /**
+     * Identifie le pays le plus consensuel (écart-type des scores le plus faible)
+     * 
+     * @return array{countryCode: string, name: string, flag: string, stdDeviation: float}|null
+     */
+    public function getMostConsensualCountry(): ?array
+    {
+        $votes = $this->getAllVotes();
+        $performances = $this->configService->getPerformances();
+        
+        if (empty($votes) || empty($performances)) {
+            return null;
+        }
+        
+        /** @var array<string, array{scores: list<int>, countryCode: string, name: string, flag: string}> $countryScores */
+        $countryScores = [];
+        
+        // Initialiser les tableaux de scores pour chaque pays
+        foreach ($performances as $countryCode => $performance) {
+            $countryScores[$countryCode] = [
+                'scores' => [],
+                'countryCode' => $countryCode,
+                'name' => $performance['name'],
+                'flag' => $performance['flag']
+            ];
+        }
+        
+        // Collecter tous les scores par pays
+        foreach ($votes as $userData) {
+            if (!isset($userData['scores']) || !is_array($userData['scores'])) {
+                continue;
+            }
+            
+            foreach ($userData['scores'] as $countryCode => $score) {
+                if (isset($countryScores[$countryCode])) {
+                    $countryScores[$countryCode]['scores'][] = $score;
+                }
+            }
+        }
+        
+        $consensualCountries = [];
+        
+        // Calculer l'écart-type pour chaque pays
+        foreach ($countryScores as $countryCode => $data) {
+            if (count($data['scores']) < 2) {
+                continue;
+            }
+            
+            $mean = array_sum($data['scores']) / count($data['scores']);
+            $variance = 0;
+            
+            foreach ($data['scores'] as $score) {
+                $variance += pow($score - $mean, 2);
+            }
+            
+            $variance /= count($data['scores']);
+            $stdDeviation = sqrt($variance);
+            
+            $consensualCountries[$countryCode] = [
+                'countryCode' => $countryCode,
+                'name' => $data['name'],
+                'flag' => $data['flag'],
+                'stdDeviation' => $stdDeviation
+            ];
+        }
+        
+        if (empty($consensualCountries)) {
+            return null;
+        }
+        
+        // Tri par écart-type croissant
+        uasort($consensualCountries, function ($a, $b) {
+            return $a['stdDeviation'] <=> $b['stdDeviation'];
+        });
+        
+        // Retourne le pays avec l'écart-type le plus faible
+        return reset($consensualCountries);
     }
 
     /**

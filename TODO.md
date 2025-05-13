@@ -49,6 +49,11 @@ Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation 
 - [x] Supprimer l'entête de la page
 - [x] Refresh automatique toutes les 10 secondes
 - [x] Ajouter un bouton de refresh manuel
+- Stats funs :
+  - [x] Joueur le plus sévère
+  - [x] Joueur le plus généreux
+  - [x] Pays le plus clivant
+  - [x] Pays le plus consensuel
 
 ### Page de votes
 - [x] Trier les pays par ordre alphabétique
