@@ -20,14 +20,17 @@
         <!-- Tailwind CSS pour le style -->
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
         
-        <!-- Styles spécifiques de l'application -->
-        <link href="{{ asset('styles/app.css') }}" rel="stylesheet">
-        
-        {% block stylesheets %}
-        {% endblock %}
-
         <!-- AlpineJS pour l'interactivité -->
         <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        
+        {% block stylesheets %}
+            <!-- Styles spécifiques de l'application via AssetMapper -->
+            <link href="{{ asset('styles/app.css') }}" rel="stylesheet">
+        {% endblock %}
+
+        {% block javascripts %}
+            {{ importmap('app') }}
+        {% endblock %}
         
         <!-- Service Worker minimaliste pour page offline -->
         <script>
@@ -54,9 +57,6 @@
                 });
             }
         </script>
-        
-        {% block javascripts %}
-        {% endblock %}
     </head>
     <body class="bg-gray-100 min-h-screen">
         <div class="w-full {% block header_class %}bg-gradient-to-r from-indigo-600 to-purple-600{% endblock %} text-white shadow-md">
