@@ -22,6 +22,14 @@ Il y a une page de résultats avec le classement des prestations.
 - **Symfony**: 7.2+
 - **Javascript**: vanilla, ES6+
 
+## Specifications & cahier des charges
+
+- [Cahier des charges](specifications.md)
+
+## Tâches de développement
+
+- [Tâches de développement](TODO.md)
+
 ## Lint & Testing
 
 - `php bin/console lint:twig /templates/xxx`: Lint Twig templates
