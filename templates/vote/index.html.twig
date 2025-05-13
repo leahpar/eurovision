@@ -5,10 +5,10 @@
 {% block header %}
 <div class="flex justify-between items-center">
     <h1 class="text-2xl font-bold">
-        {{ edition }} - Vote
+        {{ edition }}
     </h1>
     <div x-data="voteApp" class="flex items-center">
-        <span class="text-white">
+        <span class="text-white whitespace-nowrap">
             <span x-text="pseudo"></span> | <span x-text="team"></span>
         </span>
     </div>
@@ -168,8 +168,10 @@
                                     Non noté
                                 </span>
                             </div>
-                            <p class="text-sm text-gray-500 truncate" x-text="performance.artist"></p>
-                            <p class="text-sm font-medium text-gray-700 truncate" x-text="performance.song"></p>
+                            <p class="text-sm truncate">
+                                <span class="text-gray-500" x-text="performance.artist"></span> - 
+                                <span class="font-medium text-gray-700" x-text="performance.song"></span>
+                            </p>
                         </div>
                     </div>
                     
