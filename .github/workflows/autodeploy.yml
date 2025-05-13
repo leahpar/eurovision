@@ -29,6 +29,7 @@ jobs:
                      && git pull \
                      && rm -rf var/cache/* 2>/dev/null \
                      && composer install --no-dev --no-interaction \
+                     && php bin/console asset-map:compile \
                      && exit"
                   echo "Deployment completed."
             - name: cleanup SSH key
