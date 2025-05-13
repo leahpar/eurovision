@@ -138,6 +138,43 @@ chmod -R 777 var/storage
 
 L'application est configurée comme une PWA et peut être installée sur l'écran d'accueil des appareils mobiles.
 
+### Génération des icônes
+
+Pour générer les différentes tailles d'images PNG à partir du logo SVG, utilisez les commandes suivantes avec ImageMagick :
+
+```bash
+# Méthode en deux étapes pour gérer les gradients SVG correctement
+# Étape 1: Créer un PNG haute résolution à partir du SVG avec librsvg
+rsvg-convert -f png -w 1024 -h 1024 public/images/logo.svg > public/images/logo-high-res.png
+
+# Étape 2: Utiliser ce PNG comme source pour toutes les autres versions
+
+# Favicon ICO (contient plusieurs tailles)
+convert public/images/logo-high-res.png -background none -define icon:auto-resize=16,32,48,64 public/favicon.ico
+
+# Favicon PNG (différentes tailles)
+convert public/images/logo-high-res.png -background none -resize 16x16 public/images/favicon-16x16.png
+convert public/images/logo-high-res.png -background none -resize 32x32 public/images/favicon-32x32.png
+convert public/images/logo-high-res.png -background none -resize 48x48 public/images/favicon-48x48.png
+
+# PWA icons (différentes tailles)
+convert public/images/logo-high-res.png -background none -resize 192x192 public/images/icon-192x192.png
+convert public/images/logo-high-res.png -background none -resize 384x384 public/images/icon-384x384.png
+convert public/images/logo-high-res.png -background none -resize 512x512 public/images/icon-512x512.png
+cp public/images/logo-high-res.png public/images/icon-1024x1024.png
+
+# Apple Touch Icons
+convert public/images/logo-high-res.png -background none -resize 180x180 public/images/apple-touch-icon.png
+convert public/images/logo-high-res.png -background none -resize 152x152 public/images/apple-touch-icon-152x152.png
+convert public/images/logo-high-res.png -background none -resize 167x167 public/images/apple-touch-icon-167x167.png
+
+# Si rsvg-convert n'est pas disponible, installer le package librsvg:
+# Ubuntu/Debian: sudo apt-get install librsvg2-bin
+# macOS: brew install librsvg
+```
+
+Le paramètre `-background none` conserve la transparence, et `-density 300` assure une bonne qualité lors de la conversion.
+
 ## Personnalisation
 
 ### Modification des équipes

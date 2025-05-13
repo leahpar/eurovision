@@ -1,0 +1,74 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="64" fill="url(#bg-gradient)"/>
+  
+  <!-- Gradient definitions -->
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E90FF;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Star gradient -->
+    <radialGradient id="star-gradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Heart gradient -->
+    <linearGradient id="heart-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF1493;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Eurovision heart logo (simplified) -->
+  <path d="M64 25 C55 18, 42 18, 42 30 C42 18, 29 18, 20 25 C15 30, 15 40, 20 45 L40 65 L64 89 L88 65 L108 45 C113 40, 113 30, 108 25 C99 18, 86 18, 86 30 C86 18, 73 18, 64 25 Z" fill="url(#heart-gradient)" stroke="#FFF" stroke-width="2"/>
+  
+  <!-- Eurovision logo replacement with geometric elements -->
+  <g transform="translate(64,50)">
+    <!-- Central star -->
+    <path d="M0,-15 L4,-5 L15,-5 L7,2 L11,12 L0,6 L-11,12 L-7,2 L-15,-5 L-4,-5 Z" fill="url(#star-gradient)" stroke="#FFD700" stroke-width="1"/>
+    
+    <!-- Musical notes -->
+    <g transform="translate(-25,5)">
+      <circle cx="0" cy="10" r="4" fill="#FFF"/>
+      <rect x="3" y="0" width="2" height="14" fill="#FFF"/>
+      <path d="M5,0 C8,2 12,1 12,4 L5,6 Z" fill="#FFF"/>
+    </g>
+    
+    <g transform="translate(25,5)">
+      <circle cx="0" cy="10" r="4" fill="#FFF"/>
+      <rect x="3" y="0" width="2" height="14" fill="#FFF"/>
+      <path d="M5,0 C8,2 12,1 12,4 L5,6 Z" fill="#FFF"/>
+    </g>
+  </g>
+  
+  <!-- Vote elements -->
+  <!-- Hand/finger pointing -->
+  <g transform="translate(64,85)">
+    <path d="M-8,-5 C-8,-7 -6,-9 -4,-9 C-2,-9 0,-7 0,-5 L0,5 C0,7 -2,9 -4,9 C-6,9 -8,7 -8,5 Z" fill="#FFF" stroke="#333" stroke-width="1"/>
+    <path d="M0,-5 C0,-7 2,-9 4,-9 C6,-9 8,-7 8,-5 L8,5 C8,7 6,9 4,9 C2,9 0,7 0,5 Z" fill="#FFF" stroke="#333" stroke-width="1"/>
+  </g>
+  
+  <!-- 2025 text -->
+  <text x="64" y="110" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#FFF" stroke="#333" stroke-width="1">2025</text>
+  
+  <!-- Sparkles/stars around -->
+  <g fill="#FFF" opacity="0.8">
+    <circle cx="20" cy="30" r="2"/>
+    <circle cx="108" cy="25" r="1.5"/>
+    <circle cx="25" cy="95" r="1.5"/>
+    <circle cx="103" cy="95" r="2"/>
+    <path d="M15,60 L17,62 L15,64 L13,62 Z"/>
+    <path d="M113,60 L115,62 L113,64 L111,62 Z"/>
+  </g>
+  
+  <!-- Vote checkmark -->
+  <g transform="translate(85,35)">
+    <circle cx="0" cy="0" r="12" fill="#4CAF50" stroke="#FFF" stroke-width="2"/>
+    <path d="M-6,-2 L-1,3 L6,-4" stroke="#FFF" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
