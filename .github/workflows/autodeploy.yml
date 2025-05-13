@@ -1,0 +1,36 @@
+name: Deployment Workflow
+
+on:
+    push:
+        branches: ['master']
+
+jobs:
+    deploy:
+        name: Deploy
+        runs-on: ubuntu-latest
+        # Pas d'environment en version gratuite
+        # https://github.com/orgs/community/discussions/56123
+        # environment: ${{ github.ref_name }}
+        env:
+            # Nom de la branche
+            BRANCH: ${{ github.ref_name }}
+        steps:
+            - name: Set up SSH key
+              run: |
+                  install -m 600 -D /dev/null ~/.ssh/id_rsa
+                  echo "${{ secrets.SSH_DEPLOY_KEY }}" > ~/.ssh/id_rsa
+                  ssh-keyscan -H ${{ vars.SSH_HOST }} > ~/.ssh/known_hosts
+            - name: Deploy to server
+              run: |
+                  echo "Starting deployment..."
+                  echo "BRANCH: ${{ env.BRANCH }}"
+                  ssh -i ~/.ssh/id_rsa ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
+                    "cd ${{ vars.WORK_DIR }}/ \
+                     && git pull \
+                     && composer install --no-interaction --no-scripts \
+                     && php bin/console d:m:m --no-interaction --allow-no-migration \
+                     && rm -rf var/cache/* 2>/dev/null \
+                     && exit"
+                  echo "Deployment completed."
+            - name: cleanup SSH key
+              run: rm -rf ~/.ssh
