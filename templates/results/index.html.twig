@@ -253,7 +253,7 @@
                         <div class="flex items-center">
                             <span class="text-3xl mr-2" x-text="stats.divisiveCountry?.flag"></span>
                             <span class="font-bold text-gray-900" x-text="stats.divisiveCountry?.name"></span>
-                            <span class="ml-auto text-sm bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full" x-text="'σ=' + formatScore(stats.divisiveCountry?.stdDeviation)"></span>
+                            <span class="ml-auto text-sm bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full" x-text="stats.divisiveCountry?.minScore + '-' + stats.divisiveCountry?.maxScore"></span>
                         </div>
                     </div>
                 </div>
@@ -269,7 +269,7 @@
                         <div class="flex items-center">
                             <span class="text-3xl mr-2" x-text="stats.consensualCountry?.flag"></span>
                             <span class="font-bold text-gray-900" x-text="stats.consensualCountry?.name"></span>
-                            <span class="ml-auto text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" x-text="'σ=' + formatScore(stats.consensualCountry?.stdDeviation)"></span>
+                            <span class="ml-auto text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" x-text="stats.consensualCountry?.minScore + '-' + stats.consensualCountry?.maxScore"></span>
                         </div>
                     </div>
                 </div>

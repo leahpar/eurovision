@@ -332,10 +332,10 @@ class VoteService
     }
     
     /**
-     * Identifie le pays le plus clivant (écart-type des scores le plus élevé)
+     * Identifie le pays le plus clivant (plus grande différence entre les notes min et max)
      * 
      * @param string|null $team Équipe à filtrer (optionnel)
-     * @return array{countryCode: string, name: string, flag: string, stdDeviation: float}|null
+     * @return array{countryCode: string, name: string, flag: string, stdDeviation: float, minScore: int, maxScore: int, scoreDifference: int}|null
      */
     public function getMostDivisiveCountry(?string $team = null): ?array
     {
@@ -395,11 +395,18 @@ class VoteService
             $variance /= count($data['scores']);
             $stdDeviation = sqrt($variance);
             
+            $scores = $data['scores'];
+            $minScore = min($scores);
+            $maxScore = max($scores);
+            
             $divisiveCountries[$countryCode] = [
                 'countryCode' => $countryCode,
                 'name' => $data['name'],
                 'flag' => $data['flag'],
-                'stdDeviation' => $stdDeviation
+                'stdDeviation' => $stdDeviation,
+                'minScore' => $minScore,
+                'maxScore' => $maxScore,
+                'scoreDifference' => $maxScore - $minScore
             ];
         }
         
@@ -407,20 +414,20 @@ class VoteService
             return null;
         }
         
-        // Tri par écart-type décroissant
+        // Tri par différence de score décroissante
         uasort($divisiveCountries, function ($a, $b) {
-            return $b['stdDeviation'] <=> $a['stdDeviation'];
+            return $b['scoreDifference'] <=> $a['scoreDifference'];
         });
         
-        // Retourne le pays avec l'écart-type le plus élevé
+        // Retourne le pays avec la plus grande différence entre notes
         return reset($divisiveCountries);
     }
     
     /**
-     * Identifie le pays le plus consensuel (écart-type des scores le plus faible)
+     * Identifie le pays le plus consensuel (plus petite différence entre les notes min et max)
      * 
      * @param string|null $team Équipe à filtrer (optionnel)
-     * @return array{countryCode: string, name: string, flag: string, stdDeviation: float}|null
+     * @return array{countryCode: string, name: string, flag: string, stdDeviation: float, minScore: int, maxScore: int, scoreDifference: int}|null
      */
     public function getMostConsensualCountry(?string $team = null): ?array
     {
@@ -480,11 +487,18 @@ class VoteService
             $variance /= count($data['scores']);
             $stdDeviation = sqrt($variance);
             
+            $scores = $data['scores'];
+            $minScore = min($scores);
+            $maxScore = max($scores);
+            
             $consensualCountries[$countryCode] = [
                 'countryCode' => $countryCode,
                 'name' => $data['name'],
                 'flag' => $data['flag'],
-                'stdDeviation' => $stdDeviation
+                'stdDeviation' => $stdDeviation,
+                'minScore' => $minScore,
+                'maxScore' => $maxScore,
+                'scoreDifference' => $maxScore - $minScore
             ];
         }
         
@@ -492,12 +506,12 @@ class VoteService
             return null;
         }
         
-        // Tri par écart-type croissant
+        // Tri par différence de score croissante
         uasort($consensualCountries, function ($a, $b) {
-            return $a['stdDeviation'] <=> $b['stdDeviation'];
+            return $a['scoreDifference'] <=> $b['scoreDifference'];
         });
         
-        // Retourne le pays avec l'écart-type le plus faible
+        // Retourne le pays avec la plus petite différence entre notes
         return reset($consensualCountries);
     }
 
