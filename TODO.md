@@ -17,27 +17,27 @@ Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation 
 4. [x] **Gestion erreurs** : Validation JSON, fichiers manquants
 
 ## Controllers et API
-1. [ ] **ConnectionController** : Page saisie pseudo/équipe
-2. [ ] **VoteController** : Interface vote + API `/api/vote` (POST)
-3. [ ] **ResultsController** : Page résultats + API `/api/results` (GET)
-4. [ ] **Configuration routes** : Mapping URLs propres
+1. [x] **ConnectionController** : Page saisie pseudo/équipe
+2. [x] **VoteController** : Interface vote + API `/api/vote` (POST)
+3. [x] **ResultsController** : Page résultats + API `/api/results` (GET)
+4. [x] **Configuration routes** : Mapping URLs propres
 5. [ ] **Validation API** : Contrôles côté serveur pour les votes
-6. [ ] **Réponses HTTP** : Gestion erreurs API appropriées
+6. [x] **Réponses HTTP** : Gestion erreurs API appropriées
 
 ## Frontend + AlpineJS
-1. [ ] **CDN Alpine** : Ajout script tag dans layout Twig
-2. [ ] **Templates Twig** : Layouts mobile-first + grand écran
-3. [ ] **Page connexion** : Formulaire pseudo/équipe
-4. [ ] **Interface vote** : Affichage visual + AlpineJS x-data
-5. [ ] **VoteApp component** : Logique vote + soumission async
-6. [ ] **Interface résultats** : Design grand écran
-7. [ ] **ResultsApp component** : Auto-refresh + filtres équipes
-8. [ ] **LocalStorage** : Persistance pseudo/équipe/votes
-9. [ ] **Responsive design** : Focus mobile/tactile
+1. [x] **CDN Alpine** : Ajout script tag dans layout Twig
+2. [x] **Templates Twig** : Layouts mobile-first + grand écran
+3. [x] **Page connexion** : Formulaire pseudo/équipe
+4. [x] **Interface vote** : Affichage visual + AlpineJS x-data
+5. [x] **VoteApp component** : Logique vote + soumission async
+6. [x] **Interface résultats** : Design grand écran
+7. [x] **ResultsApp component** : Auto-refresh + filtres équipes
+8. [x] **LocalStorage** : Persistance pseudo/équipe/votes
+9. [x] **Responsive design** : Focus mobile/tactile
 
 ## Finitions
 1. [ ] **CSS/Design** : Cohérence visuelle entre pages
-2. [ ] **Favicon/Meta** : Tags HTML appropriés
+2. [x] **Favicon/Meta** : Tags HTML appropriés
 3. [ ] **Tests manuels** : Scénarios complets
 4. [ ] **Performance** : Vérification chargement
 5. [ ] **Documentation** : README avec instructions
