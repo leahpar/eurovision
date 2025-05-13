@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Context
+
+Ce projet est une petite appli entre potes pour voter les prestations de l'eurovision.
+Il y a une page d'accueil avec les prestations et un bouton pour voter.
+Chaque utilisateur peut voter pour chaque prestation.
+Il y a une page de résultats avec le classement des prestations.
+
+## KISS
+
+- This repository is a small personnal Symfony for a side project.
+- Don't bother with complexity, it's a simple project.
+- KISS is the key.
+- Don't hesitate to ask for more details if needed.
+
 ## Language, Framework & tools
 
 - **PHP**: 8.2+
@@ -9,13 +23,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Javascript**: vanilla, ES6+
 
 ## Lint & Testing
+
 - `php bin/console lint:twig /templates/xxx`: Lint Twig templates
 - `php bin/console lint:yaml /config/xxx`: Lint YAML files
-- `make lt`: Lint ALL templates files
-- `make ly`: Lint ALL YAML files
-- `make stan`: PhpStan static analysis
+- `php vendor/bin/phpstan analyse -c phpstan.neon -l 6`: PhpStan static analysis
 
 ## Code Style Guidelines
+
 - **Naming**: Use camelCase for methods/variables, PascalCase for classes
 - **Imports**: Group Symfony components first, then other dependencies, then project classes
 - **Types**: Include PHP 8 type hints for parameters and return values
@@ -29,12 +43,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Controller/**: Contains all application controllers; one controller per entity/feature
 - **Entity/**: Domain models with Doctrine ORM annotations
-- **EventSubscriber/**: Event listeners for Symfony events
 - **Form/**: Form type definitions and extensions
-- **Logger/**: Logging services and interfaces
-- **Notifier/**: Notification services
 - **Repository/**: Doctrine repositories with custom query methods
-- **Search/**: Classes for search functionality
 - **Service/**: Business logic and application services
 - **Twig/**: Custom Twig extensions and components
 
