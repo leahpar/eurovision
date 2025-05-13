@@ -66,18 +66,41 @@ class ResultsController extends AbstractController
             // Calculer les statistiques supplémentaires
             $highestScore = 0;
             $lowestScore = 10;
+            $highestScoreCountry = null;
+            $lowestScoreCountry = null;
             
             foreach ($ranking as $data) {
-                if ($data['averageScore'] > $highestScore) {
-                    $highestScore = $data['averageScore'];
-                }
-                if ($data['totalVotes'] > 0 && $data['averageScore'] < $lowestScore) {
-                    $lowestScore = $data['averageScore'];
+                if ($data['totalVotes'] > 0) {
+                    if ($data['averageScore'] > $highestScore) {
+                        $highestScore = $data['averageScore'];
+                        $highestScoreCountry = [
+                            'name' => $data['name'],
+                            'flag' => $data['flag'],
+                            'countryCode' => $data['countryCode']
+                        ];
+                    }
+                    
+                    if ($data['averageScore'] < $lowestScore) {
+                        $lowestScore = $data['averageScore'];
+                        $lowestScoreCountry = [
+                            'name' => $data['name'],
+                            'flag' => $data['flag'],
+                            'countryCode' => $data['countryCode']
+                        ];
+                    }
                 }
             }
             
             $stats['highestScore'] = $highestScore;
             $stats['lowestScore'] = $lowestScore;
+            
+            if ($highestScoreCountry) {
+                $stats['highestScoreCountry'] = $highestScoreCountry;
+            }
+            
+            if ($lowestScoreCountry) {
+                $stats['lowestScoreCountry'] = $lowestScoreCountry;
+            }
             
             // Fun stats
             $harshestVoter = $this->voteService->getHarshestVoter();

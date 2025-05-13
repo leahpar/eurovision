@@ -172,11 +172,27 @@
         </div>
         <div class="bg-white rounded-lg shadow-md p-5 transform transition-transform hover:scale-105">
             <h3 class="text-sm text-gray-500 uppercase">Meilleure note</h3>
-            <p class="text-3xl font-bold text-indigo-700" x-text="formatScore(stats.highestScore || 0)"></p>
+            <div class="flex items-center justify-between">
+                <p class="text-3xl font-bold text-indigo-700" x-text="formatScore(stats.highestScore || 0)"></p>
+                <template x-if="stats.highestScoreCountry">
+                    <div class="flex items-center">
+                        <span class="text-3xl mr-2" x-text="stats.highestScoreCountry.flag"></span>
+                        <span class="text-sm font-medium text-gray-600" x-text="stats.highestScoreCountry.name"></span>
+                    </div>
+                </template>
+            </div>
         </div>
         <div class="bg-white rounded-lg shadow-md p-5 transform transition-transform hover:scale-105">
             <h3 class="text-sm text-gray-500 uppercase">Note la plus basse</h3>
-            <p class="text-3xl font-bold text-indigo-700" x-text="stats.lowestScore !== undefined && stats.lowestScore < 10 ? formatScore(stats.lowestScore) : '-'"></p>
+            <div class="flex items-center justify-between">
+                <p class="text-3xl font-bold text-indigo-700" x-text="stats.lowestScore !== undefined && stats.lowestScore < 10 ? formatScore(stats.lowestScore) : '-'"></p>
+                <template x-if="stats.lowestScoreCountry">
+                    <div class="flex items-center">
+                        <span class="text-3xl mr-2" x-text="stats.lowestScoreCountry.flag"></span>
+                        <span class="text-sm font-medium text-gray-600" x-text="stats.lowestScoreCountry.name"></span>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
     
