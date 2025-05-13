@@ -22,6 +22,8 @@ class AdminController extends AbstractController
     public function index(): Response
     {
         // Récupérer les votes pour afficher la liste des joueurs
+        // Forcer le rafraîchissement pour s'assurer d'avoir la dernière version
+        $this->voteService->refreshVotes();
         $votes = $this->voteService->getAllVotes();
         $edition = $this->configService->getEdition();
         $teams = $this->configService->getTeams();
@@ -62,8 +64,8 @@ class AdminController extends AbstractController
         }
     }
 
-    #[Route('/api/admin/update-player/{oldPseudo}', name: 'api_admin_update_player', methods: ['POST'])]
-    public function updatePlayer(Request $request, string $oldPseudo): JsonResponse
+    #[Route('/api/admin/update-player/{userId}', name: 'api_admin_update_player', methods: ['POST'])]
+    public function updatePlayer(Request $request, string $userId): JsonResponse
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -87,7 +89,7 @@ class AdminController extends AbstractController
                 ], 400);
             }
             
-            $result = $this->updatePlayerInService($oldPseudo, $newPseudo, $team);
+            $result = $this->updatePlayerInService($userId, $newPseudo, $team);
             
             if ($result) {
                 return new JsonResponse([
@@ -108,11 +110,11 @@ class AdminController extends AbstractController
         }
     }
     
-    #[Route('/api/admin/delete-player/{pseudo}', name: 'api_admin_delete_player', methods: ['DELETE'])]
-    public function deletePlayer(string $pseudo): JsonResponse
+    #[Route('/api/admin/delete-player/{userId}', name: 'api_admin_delete_player', methods: ['DELETE'])]
+    public function deletePlayer(string $userId): JsonResponse
     {
         try {
-            $result = $this->deletePlayerInService($pseudo);
+            $result = $this->deletePlayerInService($userId);
             
             if ($result) {
                 return new JsonResponse([
@@ -153,22 +155,29 @@ class AdminController extends AbstractController
      * Met à jour les informations d'un joueur.
      * Cette méthode est séparée pour faciliter les tests unitaires.
      */
-    private function updatePlayerInService(string $oldPseudo, string $newPseudo, string $team): bool
+    private function updatePlayerInService(string $userId, string $newPseudo, string $team): bool
     {
         // Charger les votes actuels
         $votes = $this->voteService->getAllVotes();
         
         // Vérifier si le joueur existe
-        if (!isset($votes[$oldPseudo])) {
-            throw new \InvalidArgumentException(sprintf('Le joueur "%s" n\'existe pas.', $oldPseudo));
+        if (!isset($votes[$userId])) {
+            throw new \InvalidArgumentException(sprintf('Le joueur avec l\'ID "%s" n\'existe pas.', $userId));
         }
         
-        // Si le pseudo a changé, vérifier que le nouveau n'existe pas déjà (sauf s'il s'agit du même joueur)
-        if ($oldPseudo !== $newPseudo && isset($votes[$newPseudo])) {
-            throw new \InvalidArgumentException(sprintf('Le pseudo "%s" est déjà utilisé par un autre joueur.', $newPseudo));
+        // Récupérer l'ancien pseudo
+        $oldPseudo = $votes[$userId]['pseudo'] ?? '';
+        
+        // Vérifier que le nouveau pseudo n'est pas déjà utilisé
+        if ($oldPseudo !== $newPseudo) {
+            foreach ($votes as $id => $data) {
+                if ($id !== $userId && isset($data['pseudo']) && $data['pseudo'] === $newPseudo) {
+                    throw new \InvalidArgumentException(sprintf('Le pseudo "%s" est déjà utilisé par un autre joueur.', $newPseudo));
+                }
+            }
         }
         
-        // Lire le fichier directement (comme dans deletePlayerInService)
+        // Lire le fichier directement
         $votesFilePath = $this->getParameter('kernel.project_dir') . '/var/storage/votes.json';
         
         $votesContent = file_get_contents($votesFilePath);
@@ -181,40 +190,34 @@ class AdminController extends AbstractController
             throw new \RuntimeException('Le fichier de votes n\'est pas un JSON valide: ' . json_last_error_msg());
         }
         
-        // Récupérer les données du joueur
-        $playerData = $votesData['votes'][$oldPseudo];
-        
-        // Mettre à jour l'équipe
-        $playerData['team'] = $team;
-        
-        // Si le pseudo a changé, supprimer l'ancien et créer le nouveau
-        if ($oldPseudo !== $newPseudo) {
-            unset($votesData['votes'][$oldPseudo]);
+        // Mettre à jour les données du joueur
+        if (isset($votesData['votes'][$userId])) {
+            $votesData['votes'][$userId]['pseudo'] = $newPseudo;
+            $votesData['votes'][$userId]['team'] = $team;
+            
+            // Enregistrer le fichier mis à jour
+            $content = json_encode($votesData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            return file_put_contents($votesFilePath, $content) !== false;
         }
         
-        // Ajouter ou mettre à jour les données du joueur avec le nouveau pseudo
-        $votesData['votes'][$newPseudo] = $playerData;
-        
-        // Enregistrer le fichier mis à jour
-        $content = json_encode($votesData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        return file_put_contents($votesFilePath, $content) !== false;
+        return false;
     }
 
     /**
      * Supprime un joueur des votes.
      * Cette méthode est séparée pour faciliter les tests unitaires.
      */
-    private function deletePlayerInService(string $pseudo): bool
+    private function deletePlayerInService(string $userId): bool
     {
         // Charger les votes actuels
         $votes = $this->voteService->getAllVotes();
         
         // Vérifier si le joueur existe
-        if (!isset($votes[$pseudo])) {
-            throw new \InvalidArgumentException(sprintf('Le joueur "%s" n\'existe pas.', $pseudo));
+        if (!isset($votes[$userId])) {
+            throw new \InvalidArgumentException(sprintf('Le joueur avec l\'ID "%s" n\'existe pas.', $userId));
         }
         
-        // Ici nous devons manipuler le fichier directement car VoteService n'a pas de méthode pour supprimer un joueur
+        // Manipuler le fichier directement
         $votesFilePath = $this->getParameter('kernel.project_dir') . '/var/storage/votes.json';
         
         // Lire le fichier JSON complet
@@ -229,7 +232,7 @@ class AdminController extends AbstractController
         }
         
         // Supprimer le joueur
-        unset($votesData['votes'][$pseudo]);
+        unset($votesData['votes'][$userId]);
         
         // Enregistrer le fichier mis à jour
         $content = json_encode($votesData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

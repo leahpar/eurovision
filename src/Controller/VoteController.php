@@ -44,6 +44,7 @@ class VoteController extends AbstractController
         $pseudo = $data['pseudo'] ?? '';
         $team = $data['team'] ?? '';
         $scores = $data['scores'] ?? [];
+        $userId = $data['userId'] ?? null;
         
         // Validation basique
         if (empty($pseudo) || empty($team) || empty($scores)) {
@@ -54,11 +55,23 @@ class VoteController extends AbstractController
         }
         
         try {
+            // Si un userId est fourni mais le pseudo ne correspond pas, c'est qu'il y a eu renommage
+            if ($userId !== null) {
+                $userInfo = $this->voteService->getUserByUserId($userId);
+                
+                // Si l'ID est valide mais le pseudo a changé, mettre à jour l'ancien pseudo
+                if ($userInfo !== null && isset($userInfo['userData']['pseudo']) && $userInfo['userData']['pseudo'] !== $pseudo) {
+                    // Le pseudo a été changé par l'admin - utiliser le nouveau pseudo mais conserver l'ID
+                    $pseudo = $userInfo['userData']['pseudo'];
+                }
+            }
+            
             // Enregistrer les votes
-            $this->voteService->saveUserVotes($pseudo, $team, $scores);
+            $result = $this->voteService->saveUserVotes($pseudo, $team, $scores, $userId);
             
             return new JsonResponse([
                 'success' => true,
+                'userId' => $result['userId'],
                 'message' => 'Votes enregistrés avec succès'
             ]);
         } catch (\Exception $e) {
@@ -73,11 +86,26 @@ class VoteController extends AbstractController
     public function getUserVotes(Request $request): JsonResponse
     {
         $pseudo = $request->query->get('pseudo');
+        $userId = $request->query->get('userId');
         
+        // Si on a un ID utilisateur, on privilégie la recherche par ID
+        if (!empty($userId)) {
+            $userInfo = $this->voteService->getUserByUserId($userId);
+            
+            if ($userInfo !== null && isset($userInfo['userData']['pseudo'])) {
+                return new JsonResponse([
+                    'success' => true,
+                    'pseudo' => $userInfo['userData']['pseudo'],
+                    'votes' => $userInfo['userData']
+                ]);
+            }
+        }
+        
+        // Sinon, on fait une recherche classique par pseudo
         if (empty($pseudo)) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'Pseudo obligatoire'
+                'message' => 'Pseudo ou userId obligatoire'
             ], 400);
         }
         

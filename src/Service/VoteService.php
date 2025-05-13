@@ -34,27 +34,75 @@ class VoteService
 
         return $this->votes['votes'] ?? [];
     }
+    
+    /**
+     * Force le rechargement des votes depuis le disque.
+     */
+    public function refreshVotes(): void
+    {
+        $this->votes = null;
+        $this->loadVotes();
+    }
 
     /**
-     * Récupère les votes d'un utilisateur spécifique.
+     * Récupère les votes d'un utilisateur spécifique par son pseudo.
      * 
-     * @return array{team: string, scores: array<string, int>}|null
+     * @return array{pseudo: string, team: string, scores: array<string, int>}|null
      */
     public function getUserVotes(string $pseudo): ?array
     {
         $votes = $this->getAllVotes();
-        return $votes[$pseudo] ?? null;
+        
+        // Chercher l'utilisateur par pseudo
+        foreach ($votes as $id => $userData) {
+            if (isset($userData['pseudo']) && $userData['pseudo'] === $pseudo) {
+                // On a trouvé l'utilisateur
+                return $userData;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Recherche un utilisateur par son ID.
+     * 
+     * @return array{userId: string, userData: array{pseudo: string, team: string, scores: array<string, int>}}|null
+     */
+    public function getUserByUserId(string $userId): ?array
+    {
+        $votes = $this->getAllVotes();
+        
+        // Avec la nouvelle structure, l'ID est la clé
+        if (isset($votes[$userId])) {
+            return [
+                'userId' => $userId,
+                'userData' => $votes[$userId]
+            ];
+        }
+        
+        return null;
     }
 
+    /**
+     * Génère un ID unique pour un utilisateur.
+     */
+    private function generateUserId(): string
+    {
+        // Génère un ID unique avec préfixe
+        return 'usr_' . uniqid('', true);
+    }
+    
     /**
      * Enregistre les votes d'un utilisateur.
      * 
      * @param string $pseudo Pseudo de l'utilisateur
      * @param string $team Équipe de l'utilisateur
      * @param array<string, int> $scores Scores attribués (code pays => score)
-     * @return bool True si le vote a été enregistré avec succès
+     * @param string|null $userId ID de l'utilisateur (généré si non fourni)
+     * @return array{userId: string, success: bool} ID de l'utilisateur et statut de l'opération
      */
-    public function saveUserVotes(string $pseudo, string $team, array $scores): bool
+    public function saveUserVotes(string $pseudo, string $team, array $scores, ?string $userId = null): array
     {
         // Validation des données
         if (empty($pseudo) || empty($team)) {
@@ -75,7 +123,7 @@ class VoteService
             }
 
             // Score doit être un entier entre 0 et 10
-            if (!is_int($score) || $score < 0 || $score > 10) {
+            if (!is_numeric($score) || (int)$score != $score || $score < 0 || $score > 10) {
                 throw new \InvalidArgumentException(sprintf('Le score pour le pays "%s" doit être un entier entre 0 et 10.', $countryCode));
             }
         }
@@ -85,29 +133,56 @@ class VoteService
             $this->loadVotes();
         }
 
-        // Récupération des données existantes de l'utilisateur
-        $existingUserData = $this->votes['votes'][$pseudo] ?? null;
-        $existingScores = [];
+        // Recherche de l'utilisateur existant par pseudo d'abord
+        $foundUserId = null;
+        $existingUserData = null;
 
-        // Conserver les scores existants s'ils existent
+        // Parcourir les votes pour chercher un utilisateur avec ce pseudo
+        foreach ($this->votes['votes'] as $id => $data) {
+            if (isset($data['pseudo']) && $data['pseudo'] === $pseudo) {
+                $foundUserId = $id;
+                $existingUserData = $data;
+                break;
+            }
+        }
+
+        // Utiliser l'ID fourni ou trouvé, ou générer un nouveau
+        if ($userId !== null && !empty(trim($userId))) {
+            // ID fourni explicitement, on le garde
+        } elseif ($foundUserId !== null && !empty(trim($foundUserId))) {
+            // ID trouvé pour ce pseudo
+            $userId = $foundUserId;
+        } else {
+            // Nouveau utilisateur ou ID invalide - générer un nouvel ID
+            $userId = $this->generateUserId();
+        }
+
+        // Récupérer les scores existants s'il y en a
+        $existingScores = [];
         if ($existingUserData !== null && isset($existingUserData['scores']) && is_array($existingUserData['scores'])) {
             $existingScores = $existingUserData['scores'];
         }
 
-        // Fusion des scores existants avec les nouveaux scores (les nouveaux remplacent les anciens pour chaque pays concerné)
+        // Fusion des scores existants avec les nouveaux scores
         $mergedScores = array_merge($existingScores, $scores);
 
         // Préparation des données de vote mises à jour
         $userData = [
-            'team' => $team,  // On met à jour l'équipe au cas où elle aurait changé
+            'pseudo' => $pseudo,
+            'team' => $team,
             'scores' => $mergedScores,
         ];
 
-        // Mise à jour des votes
-        $this->votes['votes'][$pseudo] = $userData;
+        // Mise à jour des votes en utilisant l'ID comme clé
+        $this->votes['votes'][$userId] = $userData;
 
         // Sauvegarde des votes
-        return $this->saveVotes();
+        $success = $this->saveVotes();
+        
+        return [
+            'userId' => $userId,
+            'success' => $success
+        ];
     }
 
     /**
@@ -143,7 +218,7 @@ class VoteService
         }
 
         // Calcul des scores moyens
-        foreach ($votes as $userVotes) {
+        foreach ($votes as $userId => $userVotes) {
             if (!isset($userVotes['scores']) || !is_array($userVotes['scores'])) {
                 continue;
             }
@@ -202,7 +277,7 @@ class VoteService
         }
 
         // Calcul des scores moyens pour l'équipe spécifiée
-        foreach ($votes as $userVotes) {
+        foreach ($votes as $userId => $userVotes) {
             if (!isset($userVotes['team']) || $userVotes['team'] !== $team || !isset($userVotes['scores']) || !is_array($userVotes['scores'])) {
                 continue;
             }
@@ -242,13 +317,13 @@ class VoteService
         
         $voterScores = [];
         
-        foreach ($votes as $pseudo => $userData) {
+        foreach ($votes as $userId => $userData) {
             // Filtrer par équipe si demandé
             if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
                 continue;
             }
             
-            if (!isset($userData['scores']) || !is_array($userData['scores']) || empty($userData['scores'])) {
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || empty($userData['scores']) || !isset($userData['pseudo'])) {
                 continue;
             }
             
@@ -259,8 +334,8 @@ class VoteService
                 $totalScore += $score;
             }
             
-            $voterScores[$pseudo] = [
-                'pseudo' => $pseudo,
+            $voterScores[$userId] = [
+                'pseudo' => $userData['pseudo'],
                 'team' => $userData['team'] ?? 'Inconnue',
                 'averageScore' => $totalScore / $voteCount
             ];
@@ -294,13 +369,13 @@ class VoteService
         
         $voterScores = [];
         
-        foreach ($votes as $pseudo => $userData) {
+        foreach ($votes as $userId => $userData) {
             // Filtrer par équipe si demandé
             if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
                 continue;
             }
             
-            if (!isset($userData['scores']) || !is_array($userData['scores']) || empty($userData['scores'])) {
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || empty($userData['scores']) || !isset($userData['pseudo'])) {
                 continue;
             }
             
@@ -311,8 +386,8 @@ class VoteService
                 $totalScore += $score;
             }
             
-            $voterScores[$pseudo] = [
-                'pseudo' => $pseudo,
+            $voterScores[$userId] = [
+                'pseudo' => $userData['pseudo'],
                 'team' => $userData['team'] ?? 'Inconnue',
                 'averageScore' => $totalScore / $voteCount
             ];
@@ -360,7 +435,7 @@ class VoteService
         }
         
         // Collecter tous les scores par pays
-        foreach ($votes as $userData) {
+        foreach ($votes as $userId => $userData) {
             // Filtrer par équipe si demandé
             if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
                 continue;
@@ -452,7 +527,7 @@ class VoteService
         }
         
         // Collecter tous les scores par pays
-        foreach ($votes as $userData) {
+        foreach ($votes as $userId => $userData) {
             // Filtrer par équipe si demandé
             if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
                 continue;
@@ -539,6 +614,37 @@ class VoteService
         // S'assurer que la structure du fichier est correcte
         if (!isset($votes['votes'])) {
             $votes = ['votes' => []];
+        }
+        
+        // Migration du format ancien (pseudo => data) vers nouveau (id => data avec pseudo)
+        $needsMigration = false;
+        $newVotes = [];
+        
+        foreach ($votes['votes'] as $key => $data) {
+            // Si la clé est vide, c'est une erreur de migration précédente - à nettoyer
+            if (empty(trim($key))) {
+                $needsMigration = true;
+                continue;
+            }
+            
+            // Si la première partie de la clé n'est pas "usr_" et qu'il n'y a pas de champ pseudo
+            // c'est l'ancien format où le pseudo est la clé
+            if (!str_starts_with($key, 'usr_') && !isset($data['pseudo'])) {
+                $needsMigration = true;
+                $newId = $this->generateUserId();
+                $newVotes[$newId] = array_merge(['pseudo' => $key], $data);
+            } else {
+                $newVotes[$key] = $data;
+            }
+        }
+        
+        // Si on a fait une migration, mettre à jour et sauvegarder
+        if ($needsMigration) {
+            $votes['votes'] = $newVotes;
+            
+            // Sauvegarder le fichier migré
+            $content = json_encode($votes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            file_put_contents($this->votesFilePath, $content);
         }
 
         $this->votes = $votes;

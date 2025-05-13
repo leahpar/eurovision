@@ -22,6 +22,7 @@
         Alpine.data('voteApp', () => ({
             pseudo: '',
             team: '',
+            userId: '',
             scores: {},
             performances: {},
             message: '',
@@ -40,6 +41,7 @@
                 const user = JSON.parse(userData);
                 this.pseudo = user.pseudo;
                 this.team = user.team;
+                this.userId = user.userId || '';
                 
                 // Initialiser les performances
                 this.performances = {{ performances|json_encode|raw }};
@@ -52,11 +54,32 @@
                 this.isLoading = true;
                 
                 try {
-                    const response = await fetch(`{{ path('api_user_votes') }}?pseudo=${encodeURIComponent(this.pseudo)}`);
+                    // Si on a un ID, on l'utilise en priorité
+                    const endpoint = this.userId 
+                        ? `{{ path('api_user_votes') }}?userId=${encodeURIComponent(this.userId)}`
+                        : `{{ path('api_user_votes') }}?pseudo=${encodeURIComponent(this.pseudo)}`;
+                        
+                    const response = await fetch(endpoint);
                     const data = await response.json();
                     
-                    if (data.success && data.votes && data.votes.scores) {
-                        this.scores = data.votes.scores;
+                    if (data.success) {
+                        // Mise à jour du pseudo si changé par l'admin
+                        if (data.pseudo && data.pseudo !== this.pseudo) {
+                            this.pseudo = data.pseudo;
+                            
+                            // Mettre à jour le localStorage
+                            const userData = JSON.parse(localStorage.getItem('eurovisionUser') || '{}');
+                            userData.pseudo = this.pseudo;
+                            localStorage.setItem('eurovisionUser', JSON.stringify(userData));
+                        }
+                        
+                        // Récupération des scores
+                        if (data.votes && data.votes.scores) {
+                            this.scores = data.votes.scores;
+                        } else {
+                            // Initialiser un objet scores vide
+                            this.scores = {};
+                        }
                     } else {
                         // Initialiser un objet scores vide
                         this.scores = {};
@@ -95,7 +118,8 @@
                         body: JSON.stringify({
                             pseudo: this.pseudo,
                             team: this.team,
-                            scores: { [countryCode]: score }
+                            scores: { [countryCode]: score },
+                            userId: this.userId
                         })
                     });
                     
@@ -103,6 +127,16 @@
                     
                     if (!response.ok) {
                         this.showMessage(data.message || 'Erreur lors de l\'enregistrement du vote', 'error');
+                    } else if (data.success) {
+                        // Mettre à jour l'ID utilisateur s'il a été généré ou modifié
+                        if (data.userId && (!this.userId || this.userId !== data.userId)) {
+                            this.userId = data.userId;
+                            
+                            // Mettre à jour le localStorage
+                            const userData = JSON.parse(localStorage.getItem('eurovisionUser') || '{}');
+                            userData.userId = data.userId;
+                            localStorage.setItem('eurovisionUser', JSON.stringify(userData));
+                        }
                     }
                 } catch (error) {
                     console.error('Erreur lors de l\'enregistrement du vote:', error);

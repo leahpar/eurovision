@@ -38,19 +38,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <template x-for="(userData, pseudo) in votes" :key="pseudo">
+                    <template x-for="(userData, userId) in votes" :key="userId">
                         <tr class="hover:bg-gray-50">
                             <td class="py-2 px-4 border-b">
                                 <input type="text" 
-                                       :value="pseudo" 
+                                       :value="userData.pseudo" 
                                        class="w-full border rounded py-1 px-2" 
-                                       @change="updatePlayer(pseudo, $event.target.value, userData.team)"
+                                       @change="updatePlayer(userId, $event.target.value, userData.team)"
                                        :disabled="processing">
                             </td>
                             <td class="py-2 px-4 border-b">
                                 <select class="w-full border rounded py-1 px-2" 
                                         :value="userData.team" 
-                                        @change="updatePlayer(pseudo, pseudo, $event.target.value)"
+                                        @change="updatePlayer(userId, userData.pseudo, $event.target.value)"
                                         :disabled="processing">
                                     <template x-for="team in teams" :key="team">
                                         <option :value="team" :selected="team === userData.team" x-text="team"></option>
@@ -59,7 +59,7 @@
                             </td>
                             <td class="py-2 px-4 border-b" x-text="Object.keys(userData.scores || {}).length"></td>
                             <td class="py-2 px-4 border-b">
-                                <button @click="confirmDeletePlayer(pseudo)" 
+                                <button @click="confirmDeletePlayer(userId, userData.pseudo)" 
                                         class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
                                         :disabled="processing">
                                     Supprimer
@@ -123,17 +123,17 @@
                     });
                 },
                 
-                confirmDeletePlayer(pseudo) {
+                confirmDeletePlayer(userId, pseudo) {
                     if (confirm(`Êtes-vous sûr de vouloir supprimer le joueur "${pseudo}" ? Cette action est irréversible.`)) {
-                        this.deletePlayer(pseudo);
+                        this.deletePlayer(userId, pseudo);
                     }
                 },
                 
-                deletePlayer(pseudo) {
+                deletePlayer(userId, pseudo) {
                     this.processing = true;
                     this.message = '';
                     
-                    fetch(`/api/admin/delete-player/${encodeURIComponent(pseudo)}`, {
+                    fetch(`/api/admin/delete-player/${encodeURIComponent(userId)}`, {
                         method: 'DELETE',
                         headers: {
                             'Accept': 'application/json'
@@ -147,7 +147,7 @@
                         if (data.success) {
                             // Supprimer le joueur de la liste locale
                             const updatedVotes = {...this.votes};
-                            delete updatedVotes[pseudo];
+                            delete updatedVotes[userId];
                             this.votes = updatedVotes;
                         }
                     })
@@ -161,16 +161,16 @@
                     });
                 },
                 
-                updatePlayer(oldPseudo, newPseudo, team) {
-                    // Éviter les updates inutiles
-                    if (oldPseudo === newPseudo && this.votes[oldPseudo].team === team) {
+                updatePlayer(userId, newPseudo, team) {
+                    // Éviter les updates inutiles si rien n'a changé
+                    if (this.votes[userId].pseudo === newPseudo && this.votes[userId].team === team) {
                         return;
                     }
                     
                     this.processing = true;
                     this.message = '';
                     
-                    fetch(`/api/admin/update-player/${encodeURIComponent(oldPseudo)}`, {
+                    fetch(`/api/admin/update-player/${encodeURIComponent(userId)}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -190,17 +190,9 @@
                             // Mettre à jour le joueur dans la liste locale
                             const updatedVotes = {...this.votes};
                             
-                            // Si le pseudo a changé, supprimer l'ancien et créer un nouveau
-                            if (oldPseudo !== newPseudo) {
-                                const userData = {...updatedVotes[oldPseudo]};
-                                userData.team = team;
-                                
-                                delete updatedVotes[oldPseudo];
-                                updatedVotes[newPseudo] = userData;
-                            } else {
-                                // Sinon, juste mettre à jour l'équipe
-                                updatedVotes[oldPseudo].team = team;
-                            }
+                            // Mettre à jour le pseudo et l'équipe
+                            updatedVotes[userId].pseudo = newPseudo;
+                            updatedVotes[userId].team = team;
                             
                             this.votes = updatedVotes;
                         }

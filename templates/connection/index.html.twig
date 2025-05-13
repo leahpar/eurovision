@@ -14,6 +14,8 @@
             errors: {},
             isSubmitting: false,
             
+            userId: '',
+            
             init() {
                 // Récupérer les données sauvegardées dans le localStorage
                 const savedData = localStorage.getItem('eurovisionUser');
@@ -21,6 +23,7 @@
                     const userData = JSON.parse(savedData);
                     this.pseudo = userData.pseudo || '';
                     this.team = userData.team || '';
+                    this.userId = userData.userId || '';
                 }
             },
             
@@ -36,7 +39,8 @@
                         },
                         body: JSON.stringify({
                             pseudo: this.pseudo,
-                            team: this.team
+                            team: this.team,
+                            userId: this.userId
                         })
                     });
                     
@@ -47,11 +51,18 @@
                         return;
                     }
                     
-                    // Sauvegarder dans localStorage
-                    localStorage.setItem('eurovisionUser', JSON.stringify({
+                    // Sauvegarder dans localStorage avec l'ID utilisateur
+                    const userToSave = {
                         pseudo: this.pseudo,
                         team: this.team
-                    }));
+                    };
+                    
+                    // Ajouter l'ID utilisateur s'il est présent
+                    if (data.userId) {
+                        userToSave.userId = data.userId;
+                    }
+                    
+                    localStorage.setItem('eurovisionUser', JSON.stringify(userToSave));
                     
                     // Redirection vers la page de vote
                     window.location.href = data.redirect;
