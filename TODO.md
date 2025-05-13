@@ -43,14 +43,22 @@ Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation 
 ## Retours clients
 
 ### Divers
-- [ ] Readme.md => Ajouter un disclaimer indiquant que tout le code a été écrit par Claude, que le développement de ce projet a pour but de jouer avec les LLM
+- [x] Readme.md => Ajouter un disclaimer indiquant que tout le code a été écrit par Claude, que le développement de ce projet a pour but de jouer avec les LLM
 
 ### Page de résultats
-- [ ] Supprimer l'entête de la page
-- [ ] Refresh automatique toutes les 10 secondes
-- [ ] Ajouter un bouton de refresh manuel
+- [x] Supprimer l'entête de la page
+- [x] Refresh automatique toutes les 10 secondes
+- [x] Ajouter un bouton de refresh manuel
 
 ### Page de votes
-- [ ] Trier les pays par ordre alphabétique
-- [ ] Enlever le bouton de déconnexion
-- [ ] Distinguer visuellement les pays non notés
+- [x] Trier les pays par ordre alphabétique
+- [x] Enlever le bouton de déconnexion
+- [x] Distinguer visuellement les pays non notés
+- Header :
+  - [x] Titre = "Eurovision 2025" seulement
+  - [x] Pas de retour à la ligne au milieur du pseudo / équipe
+- Améliorer la card des pays : 
+  - [x] Boutons des votes sur une seule ligne SANS scroll vertical
+  - [x] Drapeau plus visible
+  - [x] Noms de la chanson et de l'artiste sur la même ligne
+  - [x] Utilise plus la largeur de l'écran
