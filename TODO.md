@@ -21,7 +21,7 @@ Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation 
 2. [x] **VoteController** : Interface vote + API `/api/vote` (POST)
 3. [x] **ResultsController** : Page résultats + API `/api/results` (GET)
 4. [x] **Configuration routes** : Mapping URLs propres
-5. [ ] **Validation API** : Contrôles côté serveur pour les votes
+5. [x] **Validation API** : Contrôles côté serveur pour les votes
 6. [x] **Réponses HTTP** : Gestion erreurs API appropriées
 
 ## Frontend + AlpineJS
@@ -37,10 +37,8 @@ Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation 
 
 ## Finitions
 1. [ ] **CSS/Design** : Cohérence visuelle entre pages
-2. [x] **Favicon/Meta** : Tags HTML appropriés
-3. [ ] **Tests manuels** : Scénarios complets
-4. [ ] **Performance** : Vérification chargement
-5. [ ] **Documentation** : README avec instructions
+2. [ ] **Favicon/Meta** : Tags HTML appropriés + PWA
+3. [ ] **Documentation** : README avec instructions
 
 ## Déploiement
 1. [ ] **Config prod** : Variables environnement

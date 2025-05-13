@@ -2,13 +2,10 @@
 
 {% block title %}{{ edition }} - Connexion{% endblock %}
 
-{% block stylesheets %}
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-{% endblock %}
+{% block header_title %}{{ edition }}{% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('connectionForm', () => ({
@@ -71,37 +68,26 @@
 {% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 class="text-center text-3xl font-extrabold text-gray-900">
-            {{ edition }}
-        </h1>
-        <h2 class="mt-2 text-center text-xl text-gray-600">
+<div class="flex flex-col items-center justify-center my-8">
+    <div class="text-center mb-8">
+        <h2 class="text-xl text-gray-600">
             Bienvenue ! Pour commencer, identifiez-vous
         </h2>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10" x-data="connectionForm">
+    <div class="w-full max-w-md">
+        <div class="bg-white py-8 px-4 shadow-lg rounded-lg sm:px-10 transform transition-all hover:shadow-xl" x-data="connectionForm">
             <div class="space-y-6">
                 {% if errors is defined and errors %}
-                    <div class="bg-red-50 border-l-4 border-red-400 p-4">
-                        <div class="flex">
-                            <div class="ml-3">
-                                <p class="text-sm text-red-700">
-                                    {{ errors }}
-                                </p>
-                            </div>
-                        </div>
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                        <p class="text-sm text-red-700">
+                            {{ errors }}
+                        </p>
                     </div>
                 {% endif %}
                 
-                <div x-show="errors.general" x-cloak class="bg-red-50 border-l-4 border-red-400 p-4">
-                    <div class="flex">
-                        <div class="ml-3">
-                            <p class="text-sm text-red-700" x-text="errors.general"></p>
-                        </div>
-                    </div>
+                <div x-show="errors.general" x-cloak class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                    <p class="text-sm text-red-700" x-text="errors.general"></p>
                 </div>
 
                 <div>
@@ -130,8 +116,12 @@
                 </div>
 
                 <div>
-                    <button @click="submit" :disabled="isSubmitting" type="button" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <button @click="submit" :disabled="isSubmitting" type="button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                         <span x-show="isSubmitting">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
                             Chargement...
                         </span>
                         <span x-show="!isSubmitting">

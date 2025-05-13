@@ -1,13 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Application de vote Eurovision pour les soirées entre amis">
+        <meta name="theme-color" content="#4F46E5">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Eurovision Vote">
+        
         <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        
+        <!-- Favicon et icônes d'application -->
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32x32.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
         
         <!-- Tailwind CSS pour le style -->
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        
+        <!-- Styles spécifiques de l'application -->
+        <link href="{{ asset('styles/app.css') }}" rel="stylesheet">
         
         {% block stylesheets %}
         {% endblock %}
@@ -15,14 +29,41 @@
         <!-- AlpineJS pour l'interactivité -->
         <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
         
+        <!-- Service Worker pour PWA -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(registration => {
+                            console.log('Service Worker enregistré avec succès:', registration);
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors de l\'enregistrement du Service Worker:', error);
+                        });
+                });
+            }
+        </script>
+        
         {% block javascripts %}
         {% endblock %}
-        
-        <style>
-            [x-cloak] { display: none !important; }
-        </style>
     </head>
-    <body class="bg-gray-100">
-        {% block body %}{% endblock %}
+    <body class="bg-gray-100 min-h-screen">
+        <div class="w-full {% block header_class %}bg-gradient-to-r from-indigo-600 to-purple-600{% endblock %} text-white shadow-md">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                {% block header %}
+                <h1 class="text-2xl md:text-3xl font-bold text-center">
+                    {% block header_title %}{{ block('title') }}{% endblock %}
+                </h1>
+                {% endblock %}
+            </div>
+        </div>
+        
+        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            {% block body %}{% endblock %}
+        </main>
+        
+        <footer class="w-full py-4 px-4 text-center text-gray-500 text-sm mt-auto">
+            <p>Eurovision Vote App - {{ "now"|date("Y") }}</p>
+        </footer>
     </body>
 </html>

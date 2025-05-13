@@ -1,3 +1,42 @@
+/* Quelques styles spécifiques à l'Eurovision */
+:root {
+  --gold: #FFD700;
+  --silver: #C0C0C0;
+  --bronze: #CD7F32;
+}
+
 body {
-    background-color: skyblue;
+  background-color: #F3F4F6;
+}
+
+/* Classement */
+.gold { background-color: var(--gold); }
+.silver { background-color: var(--silver); }
+.bronze { background-color: var(--bronze); }
+
+/* Animation */
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+/* Bouton de score */
+.score-button {
+  transition: all 0.2s ease;
+}
+
+.score-button.active {
+  background-color: #4F46E5;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Pour Alpine JS */
+[x-cloak] { 
+  display: none !important; 
 }
