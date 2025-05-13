@@ -101,9 +101,7 @@
                     
                     const data = await response.json();
                     
-                    if (response.ok) {
-                        this.showMessage('Vote enregistré !', 'success');
-                    } else {
+                    if (!response.ok) {
                         this.showMessage(data.message || 'Erreur lors de l\'enregistrement du vote', 'error');
                     }
                 } catch (error) {
