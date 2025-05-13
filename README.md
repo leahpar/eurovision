@@ -2,6 +2,8 @@
 
 Application web simple pour organiser des votes entre amis lors des soirées Eurovision.
 
+> **DISCLAIMER** : Ce projet a été entièrement développé par Claude (Anthropic), un modèle de langage IA. Il a été créé dans le but d'explorer les capacités des LLM dans le développement de code. Aucun développeur humain n'a écrit une seule ligne de code dans ce projet, à l'exception des instructions et des retours fournis.
+
 ## Description
 
 Cette application Symfony permet de :
@@ -128,12 +130,6 @@ php bin/console cache:clear --env=prod
 chmod -R 777 var/storage
 ```
 
-4. Configuration d'un backup régulier des fichiers JSON :
-```bash
-# Exemple avec cron (toutes les heures)
-0 * * * * cp /chemin/vers/var/storage/*.json /chemin/vers/backups/
-```
-
 ## PWA (Progressive Web App)
 
 L'application est configurée comme une PWA et peut être installée sur l'écran d'accueil des appareils mobiles.
@@ -148,4 +144,4 @@ Modifiez le fichier `var/storage/eurovision.json` pour ajouter/supprimer/modifie
 
 ## Licence
 
-Projet personnel. Tous droits réservés.
+[WTFPL](https://en.wikipedia.org/wiki/WTFPL)

@@ -8,12 +8,9 @@
         {{ edition }} - Vote
     </h1>
     <div x-data="voteApp" class="flex items-center">
-        <span class="mr-4 text-white">
+        <span class="text-white">
             <span x-text="pseudo"></span> | <span x-text="team"></span>
         </span>
-        <button @click="disconnectUser" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm transition-colors">
-            Déconnexion
-        </button>
     </div>
 </div>
 {% endblock %}
@@ -159,11 +156,15 @@
     <!-- Grid de pays -->
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" x-show="!isLoading">
         <template x-for="(performance, countryCode) in performances" :key="countryCode">
-            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow vote-card">
+            <div :class="{'bg-white': getScore(countryCode) > 0, 'bg-gray-100 border-2 border-dashed border-gray-300': getScore(countryCode) === 0}" 
+                class="overflow-hidden shadow rounded-lg hover:shadow-lg transition-all vote-card">
                 <div class="px-4 py-5 sm:p-6">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3" x-text="performance.flag"></span>
                         <h3 class="text-lg leading-6 font-bold text-gray-900" x-text="performance.name"></h3>
+                        <span x-show="getScore(countryCode) === 0" class="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                            Non noté
+                        </span>
                     </div>
                     <div class="mt-3 border-t pt-3">
                         <p class="text-sm text-gray-500" x-text="performance.artist"></p>

@@ -25,6 +25,11 @@ class VoteController extends AbstractController
         $edition = $this->configService->getEdition();
         $performances = $this->configService->getPerformances();
 
+        // Trier les performances par ordre alphabétique du nom de pays
+        uasort($performances, function ($a, $b) {
+            return $a['name'] <=> $b['name'];
+        });
+
         return $this->render('vote/index.html.twig', [
             'edition' => $edition,
             'performances' => $performances,
