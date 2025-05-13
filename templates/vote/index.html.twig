@@ -2,18 +2,23 @@
 
 {% block title %}{{ edition }} - Vote{% endblock %}
 
-{% block header %}
-<div class="flex justify-between items-center">
-    <h1 class="text-2xl font-bold">
-        {{ edition }}
-    </h1>
-    <div x-data="voteApp" class="flex items-center">
-        <span class="text-white whitespace-nowrap">
-            <span x-text="pseudo"></span> | <span x-text="team"></span>
-        </span>
+{% block body %}
+<div x-data="voteApp" x-cloak>
+    <!-- Header -->    
+    <div class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md mb-6">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">
+                    {{ edition }}
+                </h1>
+                <div class="flex items-center">
+                    <span class="text-white whitespace-nowrap">
+                        <span x-text="pseudo"></span> | <span x-text="team"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-{% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
@@ -194,8 +199,7 @@
 </script>
 {% endblock %}
 
-{% block body %}
-<div x-data="voteApp" x-cloak class="px-1 sm:px-2">
+    <div class="px-1 sm:px-2">
     <!-- Message de notification -->
     <div x-show="message" 
          :class="{
