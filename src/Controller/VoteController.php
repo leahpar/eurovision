@@ -80,6 +80,8 @@ class VoteController extends AbstractController
             return new JsonResponse([
                 'success' => true,
                 'userId' => $result['userId'],
+                'pseudo' => $pseudo,
+                'team' => $team,
                 'message' => 'Votes enregistrés avec succès'
             ]);
         } catch (\Exception $e) {

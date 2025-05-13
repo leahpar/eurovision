@@ -147,6 +147,26 @@
                             userData.userId = data.userId;
                             localStorage.setItem('eurovisionUser', JSON.stringify(userData));
                         }
+                        
+                        // Mettre à jour le pseudo si changé par l'admin
+                        if (data.pseudo && data.pseudo !== this.pseudo) {
+                            this.pseudo = data.pseudo;
+                            
+                            // Mettre à jour le localStorage
+                            const userData = JSON.parse(localStorage.getItem('eurovisionUser') || '{}');
+                            userData.pseudo = data.pseudo;
+                            localStorage.setItem('eurovisionUser', JSON.stringify(userData));
+                        }
+                        
+                        // Mettre à jour l'équipe si changée par l'admin
+                        if (data.team && data.team !== this.team) {
+                            this.team = data.team;
+                            
+                            // Mettre à jour le localStorage
+                            const userData = JSON.parse(localStorage.getItem('eurovisionUser') || '{}');
+                            userData.team = data.team;
+                            localStorage.setItem('eurovisionUser', JSON.stringify(userData));
+                        }
                     }
                 } catch (error) {
                     console.error('Erreur lors de l\'enregistrement du vote:', error);
