@@ -2,8 +2,11 @@
   "eurovision": {
     "edition": "Eurovision 2025",
     "teams": [
-      "Team Filles",
-      "Team Ribets"
+      "Les Langlois",
+      "Les Ribet",
+      "Les Lucas",
+      "Les Potes",
+      "Invités"
     ],
     "performances": {
       "FRA": {
