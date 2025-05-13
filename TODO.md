@@ -1,15 +1,20 @@
 # Tâches de développement
 
+Les tâches sont regroupées par catégories pour faciliter la gestion du projet.
+En l'occurrence ici, le chapitre 1 contient 3 tâches distinctes.
+
+Chaque tâche doit être suivie des lints, tests, et d'un commit. Et validation avant de passer à la suivante.
+
 ## 1. Configuration et base
 - [x] **Setup Symfony** : Nouveau projet Symfony 7.2+, config PHP 8.2+
-- [ ] **Fichier config** : Créer `var/storage/eurovision.json` avec structure complète
-- [ ] **Sample data** : Ajouter quelques pays/équipes pour tester
+- [x] **Fichier config** : Créer `var/storage/eurovision.json` avec structure complète
+- [x] **Sample data** : Ajouter quelques pays/équipes pour tester
 
 ## 2. Services backend
-- [ ] **ConfigService** : Lecture du fichier `eurovision.json`
-- [ ] **VoteService** : Gestion lecture/écriture `var/storage/votes.json`
-- [ ] **Tests unitaires** : Pour ConfigService et VoteService
-- [ ] **Gestion erreurs** : Validation JSON, fichiers manquants
+- [x] **ConfigService** : Lecture du fichier `eurovision.json`
+- [x] **VoteService** : Gestion lecture/écriture `var/storage/votes.json`
+- [x] **Tests unitaires** : Pour ConfigService et VoteService
+- [x] **Gestion erreurs** : Validation JSON, fichiers manquants
 
 ## 3. Controllers et API
 - [ ] **ConnectionController** : Page saisie pseudo/équipe

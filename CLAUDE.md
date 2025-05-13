@@ -30,6 +30,15 @@ Il y a une page de résultats avec le classement des prestations.
 
 - [Tâches de développement](TODO.md)
 
+## Comment travailler
+
+Pour chaque tâche :
+- Implémenter la fonctionnalité
+- Linter le code et/ou yaml et/ou twig (voir ci-dessous)
+- Écrire quelques tests unitaires (si pertinent)
+- Proposer un commit avec un message clair et en français
+- Attendre ma validation avant continuer
+
 ## Lint & Testing
 
 - `php bin/console lint:twig /templates/xxx`: Lint Twig templates

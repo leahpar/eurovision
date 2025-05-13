@@ -1,0 +1,285 @@
+<?php
+
+namespace App\Service;
+
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
+
+class VoteService
+{
+    private string $votesFilePath;
+    /** @var array<string, mixed>|null */
+    private ?array $votes = null;
+
+    public function __construct(
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly Filesystem $filesystem,
+        private readonly ConfigService $configService
+    ) {
+        $this->votesFilePath = $this->parameterBag->get('kernel.project_dir') . '/var/storage/votes.json';
+    }
+
+    /**
+     * Récupère tous les votes.
+     * 
+     * @return array<string, mixed>
+     */
+    public function getAllVotes(): array
+    {
+        if ($this->votes === null) {
+            $this->loadVotes();
+        }
+
+        return $this->votes['votes'] ?? [];
+    }
+
+    /**
+     * Récupère les votes d'un utilisateur spécifique.
+     * 
+     * @return array{team: string, scores: array<string, int>}|null
+     */
+    public function getUserVotes(string $pseudo): ?array
+    {
+        $votes = $this->getAllVotes();
+        return $votes[$pseudo] ?? null;
+    }
+
+    /**
+     * Enregistre les votes d'un utilisateur.
+     * 
+     * @param string $pseudo Pseudo de l'utilisateur
+     * @param string $team Équipe de l'utilisateur
+     * @param array<string, int> $scores Scores attribués (code pays => score)
+     * @return bool True si le vote a été enregistré avec succès
+     */
+    public function saveUserVotes(string $pseudo, string $team, array $scores): bool
+    {
+        // Validation des données
+        if (empty($pseudo) || empty($team)) {
+            throw new \InvalidArgumentException('Le pseudo et l\'équipe sont obligatoires.');
+        }
+
+        // Validation de l'équipe
+        $validTeams = $this->configService->getTeams();
+        if (!in_array($team, $validTeams, true)) {
+            throw new \InvalidArgumentException(sprintf('L\'équipe "%s" n\'est pas valide.', $team));
+        }
+
+        // Validation des scores
+        $validPerformances = array_keys($this->configService->getPerformances());
+        foreach ($scores as $countryCode => $score) {
+            if (!in_array($countryCode, $validPerformances, true)) {
+                throw new \InvalidArgumentException(sprintf('Le pays "%s" n\'est pas valide.', $countryCode));
+            }
+
+            // Score doit être un entier entre 0 et 10
+            if (!is_numeric($score) || intval($score) != $score || $score < 0 || $score > 10) {
+                throw new \InvalidArgumentException(sprintf('Le score pour le pays "%s" doit être un entier entre 0 et 10.', $countryCode));
+            }
+            
+            // Conversion explicite en entier
+            $scores[$countryCode] = (int) $score;
+        }
+
+        // Chargement des votes existants
+        if ($this->votes === null) {
+            $this->loadVotes();
+        }
+
+        // Préparation des nouvelles données de vote
+        $userData = [
+            'team' => $team,
+            'scores' => $scores,
+        ];
+
+        // Mise à jour des votes
+        $this->votes['votes'][$pseudo] = $userData;
+
+        // Sauvegarde des votes
+        return $this->saveVotes();
+    }
+
+    /**
+     * Calcule le classement des performances.
+     * 
+     * @return array<string, array{
+     *     countryCode: string,
+     *     name: string,
+     *     artist: string,
+     *     song: string,
+     *     flag: string,
+     *     averageScore: float,
+     *     totalVotes: int
+     * }>
+     */
+    public function calculateRanking(): array
+    {
+        $votes = $this->getAllVotes();
+        $performances = $this->configService->getPerformances();
+        $ranking = [];
+
+        // Initialisation du classement
+        foreach ($performances as $countryCode => $performance) {
+            $ranking[$countryCode] = [
+                'countryCode' => $countryCode,
+                'name' => $performance['name'],
+                'artist' => $performance['artist'],
+                'song' => $performance['song'],
+                'flag' => $performance['flag'],
+                'averageScore' => 0,
+                'totalVotes' => 0,
+            ];
+        }
+
+        // Calcul des scores moyens
+        foreach ($votes as $userVotes) {
+            if (!isset($userVotes['scores']) || !is_array($userVotes['scores'])) {
+                continue;
+            }
+
+            foreach ($userVotes['scores'] as $countryCode => $score) {
+                if (!isset($ranking[$countryCode])) {
+                    continue;
+                }
+
+                $ranking[$countryCode]['totalVotes']++;
+                // Mise à jour incrémentale de la moyenne
+                $currentTotal = $ranking[$countryCode]['averageScore'] * ($ranking[$countryCode]['totalVotes'] - 1);
+                $ranking[$countryCode]['averageScore'] = ($currentTotal + $score) / $ranking[$countryCode]['totalVotes'];
+            }
+        }
+
+        // Tri par score moyen décroissant
+        uasort($ranking, function ($a, $b) {
+            return $b['averageScore'] <=> $a['averageScore'];
+        });
+
+        return $ranking;
+    }
+
+    /**
+     * Filtre le classement par équipe.
+     * 
+     * @param string $team Équipe à filtrer
+     * @return array<string, array{
+     *     countryCode: string,
+     *     name: string,
+     *     artist: string,
+     *     song: string,
+     *     flag: string,
+     *     averageScore: float,
+     *     totalVotes: int
+     * }>
+     */
+    public function getTeamRanking(string $team): array
+    {
+        $votes = $this->getAllVotes();
+        $performances = $this->configService->getPerformances();
+        $ranking = [];
+
+        // Initialisation du classement
+        foreach ($performances as $countryCode => $performance) {
+            $ranking[$countryCode] = [
+                'countryCode' => $countryCode,
+                'name' => $performance['name'],
+                'artist' => $performance['artist'],
+                'song' => $performance['song'],
+                'flag' => $performance['flag'],
+                'averageScore' => 0,
+                'totalVotes' => 0,
+            ];
+        }
+
+        // Calcul des scores moyens pour l'équipe spécifiée
+        foreach ($votes as $userVotes) {
+            if (!isset($userVotes['team']) || $userVotes['team'] !== $team || !isset($userVotes['scores']) || !is_array($userVotes['scores'])) {
+                continue;
+            }
+
+            foreach ($userVotes['scores'] as $countryCode => $score) {
+                if (!isset($ranking[$countryCode])) {
+                    continue;
+                }
+
+                $ranking[$countryCode]['totalVotes']++;
+                // Mise à jour incrémentale de la moyenne
+                $currentTotal = $ranking[$countryCode]['averageScore'] * ($ranking[$countryCode]['totalVotes'] - 1);
+                $ranking[$countryCode]['averageScore'] = ($currentTotal + $score) / $ranking[$countryCode]['totalVotes'];
+            }
+        }
+
+        // Tri par score moyen décroissant
+        uasort($ranking, function ($a, $b) {
+            return $b['averageScore'] <=> $a['averageScore'];
+        });
+
+        return $ranking;
+    }
+
+    /**
+     * Charge les votes depuis le fichier JSON.
+     */
+    private function loadVotes(): void
+    {
+        // Si le fichier n'existe pas, on crée une structure vide
+        if (!$this->filesystem->exists($this->votesFilePath)) {
+            $this->votes = ['votes' => []];
+            return;
+        }
+
+        $votesContent = file_get_contents($this->votesFilePath);
+        if ($votesContent === false) {
+            throw new \RuntimeException(sprintf('Impossible de lire le fichier de votes %s.', $this->votesFilePath));
+        }
+
+        $votes = json_decode($votesContent, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException(sprintf('Le fichier de votes %s n\'est pas un JSON valide: %s', $this->votesFilePath, json_last_error_msg()));
+        }
+
+        // S'assurer que la structure du fichier est correcte
+        if (!isset($votes['votes'])) {
+            $votes = ['votes' => []];
+        }
+
+        $this->votes = $votes;
+    }
+
+    /**
+     * Sauvegarde les votes dans le fichier JSON avec un mécanisme de verrouillage.
+     */
+    private function saveVotes(): bool
+    {
+        // Utiliser un verrouillage de fichier pour éviter les conflits d'écriture
+        $store = new FlockStore(sys_get_temp_dir());
+        $lockFactory = new LockFactory($store);
+        $lock = $lockFactory->createLock('votes.json');
+
+        if (!$lock->acquire()) {
+            // Impossible d'obtenir le verrouillage
+            return false;
+        }
+
+        try {
+            // Assurer que le répertoire existe
+            $directory = dirname($this->votesFilePath);
+            if (!$this->filesystem->exists($directory)) {
+                $this->filesystem->mkdir($directory, 0755);
+            }
+
+            // Écrire les données
+            $content = json_encode($this->votes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            if ($content === false) {
+                throw new \RuntimeException('Impossible d\'encoder les votes en JSON.');
+            }
+
+            file_put_contents($this->votesFilePath, $content);
+            return true;
+        } finally {
+            // Toujours libérer le verrou
+            $lock->release();
+        }
+    }
+}
