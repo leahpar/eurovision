@@ -1,0 +1,233 @@
+{
+  "eurovision": {
+    "edition": "Eurovision 2025",
+    "teams": [
+      "Team Filles",
+      "Team Ribets"
+    ],
+    "performances": {
+      "FRA": {
+        "name": "France",
+        "artist": "Louane",
+        "song": "Maman",
+        "flag": "🇫🇷"
+      },
+      "GER": {
+        "name": "Germany",
+        "artist": "Abor & Tynna",
+        "song": "Baller",
+        "flag": "🇩🇪"
+      },
+      "ITA": {
+        "name": "Italy",
+        "artist": "Lucio Corsi",
+        "song": "Volevo Essere Un Duro",
+        "flag": "🇮🇹"
+      },
+      "ESP": {
+        "name": "Spain",
+        "artist": "Melody",
+        "song": "ESA DIVA",
+        "flag": "🇪🇸"
+      },
+      "GBR": {
+        "name": "United Kingdom",
+        "artist": "Remember Monday",
+        "song": "What The Hell Just Happened?",
+        "flag": "🇬🇧"
+      },
+      "CHE": {
+        "name": "Switzerland",
+        "artist": "Zoë Më",
+        "song": "Voyage",
+        "flag": "🇨🇭"
+      },
+      "SWE": {
+        "name": "Sweden",
+        "artist": "KAJ",
+        "song": "Bara Bada Bastu",
+        "flag": "🇸🇪"
+      },
+      "NLD": {
+        "name": "Netherlands",
+        "artist": "Claude",
+        "song": "C'est La Vie",
+        "flag": "🇳🇱"
+      },
+      "NOR": {
+        "name": "Norway",
+        "artist": "Kyle Alessandro",
+        "song": "Lighter",
+        "flag": "🇳🇴"
+      },
+      "BEL": {
+        "name": "Belgium",
+        "artist": "Red Sebastian",
+        "song": "Strobe Lights",
+        "flag": "🇧🇪"
+      },
+      "AZE": {
+        "name": "Azerbaijan",
+        "artist": "Mamagama",
+        "song": "Run With U",
+        "flag": "🇦🇿"
+      },
+      "SMR": {
+        "name": "San Marino",
+        "artist": "Gabry Ponte",
+        "song": "Tutta L'Italia",
+        "flag": "🇸🇲"
+      },
+      "ALB": {
+        "name": "Albania",
+        "artist": "Shkodra Elektronike",
+        "song": "Zjerm",
+        "flag": "🇦🇱"
+      },
+      "HRV": {
+        "name": "Croatia",
+        "artist": "Marko Bošnjak",
+        "song": "Poison Cake",
+        "flag": "🇭🇷"
+      },
+      "CYP": {
+        "name": "Cyprus",
+        "artist": "Theo Evan",
+        "song": "Shh",
+        "flag": "🇨🇾"
+      },
+      "PRT": {
+        "name": "Portugal",
+        "artist": "NAPA",
+        "song": "Deslocado",
+        "flag": "🇵🇹"
+      },
+      "AUS": {
+        "name": "Australia",
+        "artist": "Go-Jo",
+        "song": "Milkshake Man",
+        "flag": "🇦🇺"
+      },
+      "MNE": {
+        "name": "Montenegro",
+        "artist": "Nina Žižić",
+        "song": "Dobrodošli",
+        "flag": "🇲🇪"
+      },
+      "IRL": {
+        "name": "Ireland",
+        "artist": "EMMY",
+        "song": "Laika Party",
+        "flag": "🇮🇪"
+      },
+      "LVA": {
+        "name": "Latvia",
+        "artist": "Tautumeitas",
+        "song": "Bur Man Laimi",
+        "flag": "🇱🇻"
+      },
+      "ARM": {
+        "name": "Armenia",
+        "artist": "PARG",
+        "song": "SURVIVOR",
+        "flag": "🇦🇲"
+      },
+      "AUT": {
+        "name": "Austria",
+        "artist": "JJ",
+        "song": "Wasted Love",
+        "flag": "🇦🇹"
+      },
+      "GRC": {
+        "name": "Greece",
+        "artist": "Klavdia",
+        "song": "Asteromáta",
+        "flag": "🇬🇷"
+      },
+      "LTU": {
+        "name": "Lithuania",
+        "artist": "Katarsis",
+        "song": "Tavo Akys",
+        "flag": "🇱🇹"
+      },
+      "DNK": {
+        "name": "Denmark",
+        "artist": "Sissal",
+        "song": "Hallucination",
+        "flag": "🇩🇰"
+      },
+      "SVN": {
+        "name": "Slovenia",
+        "artist": "Klemen",
+        "song": "How Much Time Do We Have Left",
+        "flag": "🇸🇮"
+      },
+      "UKR": {
+        "name": "Ukraine",
+        "artist": "Ziferblat",
+        "song": "Bird of Pray",
+        "flag": "🇺🇦"
+      },
+      "FIN": {
+        "name": "Finland",
+        "artist": "Erika Vikman",
+        "song": "ICH KOMME",
+        "flag": "🇫🇮"
+      },
+      "ISR": {
+        "name": "Israel",
+        "artist": "Yuval Raphael",
+        "song": "New Day Will Rise",
+        "flag": "🇮🇱"
+      },
+      "LUX": {
+        "name": "Luxembourg",
+        "artist": "Laura Thorn",
+        "song": "La Poupée Monte Le Son",
+        "flag": "🇱🇺"
+      },
+      "MLT": {
+        "name": "Malta",
+        "artist": "Miriana Conte",
+        "song": "SERVING",
+        "flag": "🇲🇹"
+      },
+      "POL": {
+        "name": "Poland",
+        "artist": "Justyna Steczkowska",
+        "song": "GAJA",
+        "flag": "🇵🇱"
+      },
+      "SRB": {
+        "name": "Serbia",
+        "artist": "Princ",
+        "song": "Mila",
+        "flag": "🇷🇸"
+      },
+      "ISL": {
+        "name": "Iceland",
+        "artist": "VÆB",
+        "song": "RÓA",
+        "flag": "🇮🇸"
+      },
+      "EST": {
+        "name": "Estonia",
+        "artist": "Tommy Cash",
+        "song": "Espresso Macchiato",
+        "flag": "🇪🇪"
+      },
+      "GEO": {
+        "name": "Georgia",
+        "artist": "Mariam Shengelia",
+        "song": "Freedom",
+        "flag": "🇬🇪"
+      },
+      "CZE": {
+        "name": "Czech Republic",
+        "artist": "ADONXS",
+        "song": "Kiss Kiss Goodbye",
+        "flag": "🇨🇿"
+      }
+    }
+  }
+}

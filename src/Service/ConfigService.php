@@ -15,7 +15,7 @@ class ConfigService
         private readonly ParameterBagInterface $parameterBag,
         private readonly Filesystem $filesystem
     ) {
-        $this->configFilePath = $this->parameterBag->get('kernel.project_dir') . '/var/storage/eurovision.json';
+        $this->configFilePath = $this->parameterBag->get('kernel.project_dir') . '/config/data/eurovision.json';
     }
 
     /**
