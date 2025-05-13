@@ -9,10 +9,7 @@ body {
   background-color: #F3F4F6;
 }
 
-/* Classement */
-.gold { background-color: var(--gold); }
-.silver { background-color: var(--silver); }
-.bronze { background-color: var(--bronze); }
+/* Le style des couleurs de classement n'est plus utilisé */
 
 /* Animation */
 @keyframes pulse {

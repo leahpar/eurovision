@@ -85,11 +85,11 @@
                 this.loadResults();
             },
             
-            getRankClass(rank) {
-                if (rank === 1) return 'gold text-yellow-800';
-                if (rank === 2) return 'silver text-gray-800';
-                if (rank === 3) return 'bronze text-yellow-900';
-                return '';
+            getRankMedal(rank) {
+                if (rank === 1) return '🥇';
+                if (rank === 2) return '🥈';
+                if (rank === 3) return '🥉';
+                return rank;
             },
             
             formatScore(score) {
@@ -190,10 +190,10 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <template x-for="entry in ranking" :key="entry.countryCode">
-                            <tr :class="getRankClass(entry.rank)" class="transition-colors hover:bg-gray-50">
+                            <tr class="transition-colors hover:bg-gray-50" :class="{ 'bg-gray-50': entry.rank <= 3 }">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center justify-center">
-                                        <span class="text-xl font-bold" x-text="entry.rank"></span>
+                                        <span class="text-2xl" x-text="getRankMedal(entry.rank)"></span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
