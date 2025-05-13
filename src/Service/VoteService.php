@@ -230,9 +230,10 @@ class VoteService
     /**
      * Identifie le joueur le plus sévère (moyenne de votes la plus basse)
      * 
+     * @param string|null $team Équipe à filtrer (optionnel)
      * @return array{pseudo: string, team: string, averageScore: float}|null
      */
-    public function getHarshestVoter(): ?array
+    public function getHarshestVoter(?string $team = null): ?array
     {
         $votes = $this->getAllVotes();
         if (empty($votes)) {
@@ -242,6 +243,11 @@ class VoteService
         $voterScores = [];
         
         foreach ($votes as $pseudo => $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
             if (!isset($userData['scores']) || !is_array($userData['scores']) || empty($userData['scores'])) {
                 continue;
             }
@@ -276,9 +282,10 @@ class VoteService
     /**
      * Identifie le joueur le plus généreux (moyenne de votes la plus haute)
      * 
+     * @param string|null $team Équipe à filtrer (optionnel)
      * @return array{pseudo: string, team: string, averageScore: float}|null
      */
-    public function getGenerousVoter(): ?array
+    public function getGenerousVoter(?string $team = null): ?array
     {
         $votes = $this->getAllVotes();
         if (empty($votes)) {
@@ -288,6 +295,11 @@ class VoteService
         $voterScores = [];
         
         foreach ($votes as $pseudo => $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
             if (!isset($userData['scores']) || !is_array($userData['scores']) || empty($userData['scores'])) {
                 continue;
             }
@@ -322,9 +334,10 @@ class VoteService
     /**
      * Identifie le pays le plus clivant (écart-type des scores le plus élevé)
      * 
+     * @param string|null $team Équipe à filtrer (optionnel)
      * @return array{countryCode: string, name: string, flag: string, stdDeviation: float}|null
      */
-    public function getMostDivisiveCountry(): ?array
+    public function getMostDivisiveCountry(?string $team = null): ?array
     {
         $votes = $this->getAllVotes();
         $performances = $this->configService->getPerformances();
@@ -348,6 +361,11 @@ class VoteService
         
         // Collecter tous les scores par pays
         foreach ($votes as $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
             if (!isset($userData['scores']) || !is_array($userData['scores'])) {
                 continue;
             }
@@ -401,9 +419,10 @@ class VoteService
     /**
      * Identifie le pays le plus consensuel (écart-type des scores le plus faible)
      * 
+     * @param string|null $team Équipe à filtrer (optionnel)
      * @return array{countryCode: string, name: string, flag: string, stdDeviation: float}|null
      */
-    public function getMostConsensualCountry(): ?array
+    public function getMostConsensualCountry(?string $team = null): ?array
     {
         $votes = $this->getAllVotes();
         $performances = $this->configService->getPerformances();
@@ -427,6 +446,11 @@ class VoteService
         
         // Collecter tous les scores par pays
         foreach ($votes as $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
             if (!isset($userData['scores']) || !is_array($userData['scores'])) {
                 continue;
             }

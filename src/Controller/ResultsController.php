@@ -102,23 +102,23 @@ class ResultsController extends AbstractController
                 $stats['lowestScoreCountry'] = $lowestScoreCountry;
             }
             
-            // Fun stats
-            $harshestVoter = $this->voteService->getHarshestVoter();
+            // Fun stats - filtrer par équipe si demandé
+            $harshestVoter = $this->voteService->getHarshestVoter(!empty($team) ? $team : null);
             if ($harshestVoter) {
                 $stats['harshestVoter'] = $harshestVoter;
             }
             
-            $generousVoter = $this->voteService->getGenerousVoter();
+            $generousVoter = $this->voteService->getGenerousVoter(!empty($team) ? $team : null);
             if ($generousVoter) {
                 $stats['generousVoter'] = $generousVoter;
             }
             
-            $divisiveCountry = $this->voteService->getMostDivisiveCountry();
+            $divisiveCountry = $this->voteService->getMostDivisiveCountry(!empty($team) ? $team : null);
             if ($divisiveCountry) {
                 $stats['divisiveCountry'] = $divisiveCountry;
             }
             
-            $consensualCountry = $this->voteService->getMostConsensualCountry();
+            $consensualCountry = $this->voteService->getMostConsensualCountry(!empty($team) ? $team : null);
             if ($consensualCountry) {
                 $stats['consensualCountry'] = $consensualCountry;
             }
