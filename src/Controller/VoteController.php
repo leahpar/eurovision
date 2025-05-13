@@ -59,15 +59,15 @@ class VoteController extends AbstractController
             if ($userId !== null) {
                 $userInfo = $this->voteService->getUserByUserId($userId);
                 
-                if ($userInfo !== null && !empty($userInfo['userData'])) {
+                if ($userInfo !== null) {
                     // Si l'ID est valide mais le pseudo a changé, mettre à jour l'ancien pseudo
-                    if (isset($userInfo['userData']['pseudo']) && $userInfo['userData']['pseudo'] !== $pseudo) {
+                    if ($userInfo['userData']['pseudo'] !== $pseudo) {
                         // Le pseudo a été changé par l'admin - utiliser le nouveau pseudo mais conserver l'ID
                         $pseudo = $userInfo['userData']['pseudo'];
                     }
                     
                     // Si l'ID est valide mais l'équipe a changé, mettre à jour l'ancienne équipe
-                    if (isset($userInfo['userData']['team']) && $userInfo['userData']['team'] !== $team) {
+                    if ($userInfo['userData']['team'] !== $team) {
                         // L'équipe a été changée par l'admin - utiliser la nouvelle équipe mais conserver l'ID
                         $team = $userInfo['userData']['team'];
                     }
@@ -102,15 +102,16 @@ class VoteController extends AbstractController
         if (!empty($userId)) {
             $userInfo = $this->voteService->getUserByUserId($userId);
             
-            if ($userInfo !== null && !empty($userInfo['userData'])) {
-                $pseudo = $userInfo['userData']['pseudo'] ?? '';
-                $team = $userInfo['userData']['team'] ?? '';
+            if ($userInfo !== null) {
+                $pseudo = $userInfo['userData']['pseudo'];
+                $team = $userInfo['userData']['team'];
                 
                 return new JsonResponse([
                     'success' => true,
                     'pseudo' => $pseudo,
                     'team' => $team,
-                    'votes' => $userInfo['userData']
+                    'votes' => $userInfo['userData'],
+                    'userId' => $userId
                 ]);
             }
         }
@@ -125,9 +126,20 @@ class VoteController extends AbstractController
         
         $userVotes = $this->voteService->getUserVotes($pseudo);
         
+        // Si on a trouvé l'utilisateur, on inclut son pseudo et son équipe
+        if ($userVotes !== null) {
+            return new JsonResponse([
+                'success' => true,
+                'votes' => $userVotes,
+                'pseudo' => $userVotes['pseudo'],
+                'team' => $userVotes['team']
+            ]);
+        }
+        
         return new JsonResponse([
             'success' => true,
-            'votes' => $userVotes
+            'votes' => $userVotes,
+            'pseudo' => $pseudo
         ]);
     }
 }
