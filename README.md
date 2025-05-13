@@ -2,7 +2,11 @@
 
 Application web simple pour organiser des votes entre amis lors des soirées Eurovision.
 
-> **DISCLAIMER** : Ce projet a été entièrement développé par Claude (Anthropic), un modèle de langage IA. Il a été créé dans le but d'explorer les capacités des LLM dans le développement de code. Aucun développeur humain n'a écrit une seule ligne de code dans ce projet, à l'exception des instructions et des retours fournis.
+> **DISCLAIMER** : 🤖🤖
+> Ce projet a été entièrement développé par Claude (Anthropic), un modèle de langage IA.
+> Il a été créé dans le but d'explorer les capacités des LLM dans le développement de code.
+> Aucun développeur humain n'a écrit une seule ligne de code dans ce projet,
+> à l'exception des instructions et des retours fournis.
 
 ## Description
 
