@@ -73,6 +73,16 @@
                             localStorage.setItem('eurovisionUser', JSON.stringify(userData));
                         }
                         
+                        // Mise à jour de l'équipe si changée par l'admin
+                        if (data.team && data.team !== this.team) {
+                            this.team = data.team;
+                            
+                            // Mettre à jour le localStorage
+                            const userData = JSON.parse(localStorage.getItem('eurovisionUser') || '{}');
+                            userData.team = this.team;
+                            localStorage.setItem('eurovisionUser', JSON.stringify(userData));
+                        }
+                        
                         // Récupération des scores
                         if (data.votes && data.votes.scores) {
                             this.scores = data.votes.scores;

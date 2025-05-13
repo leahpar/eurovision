@@ -55,14 +55,22 @@ class VoteController extends AbstractController
         }
         
         try {
-            // Si un userId est fourni mais le pseudo ne correspond pas, c'est qu'il y a eu renommage
+            // Si un userId est fourni mais le pseudo ou l'équipe ne correspond pas, c'est qu'il y a eu un changement
             if ($userId !== null) {
                 $userInfo = $this->voteService->getUserByUserId($userId);
                 
-                // Si l'ID est valide mais le pseudo a changé, mettre à jour l'ancien pseudo
-                if ($userInfo !== null && isset($userInfo['userData']['pseudo']) && $userInfo['userData']['pseudo'] !== $pseudo) {
-                    // Le pseudo a été changé par l'admin - utiliser le nouveau pseudo mais conserver l'ID
-                    $pseudo = $userInfo['userData']['pseudo'];
+                if ($userInfo !== null && !empty($userInfo['userData'])) {
+                    // Si l'ID est valide mais le pseudo a changé, mettre à jour l'ancien pseudo
+                    if (isset($userInfo['userData']['pseudo']) && $userInfo['userData']['pseudo'] !== $pseudo) {
+                        // Le pseudo a été changé par l'admin - utiliser le nouveau pseudo mais conserver l'ID
+                        $pseudo = $userInfo['userData']['pseudo'];
+                    }
+                    
+                    // Si l'ID est valide mais l'équipe a changé, mettre à jour l'ancienne équipe
+                    if (isset($userInfo['userData']['team']) && $userInfo['userData']['team'] !== $team) {
+                        // L'équipe a été changée par l'admin - utiliser la nouvelle équipe mais conserver l'ID
+                        $team = $userInfo['userData']['team'];
+                    }
                 }
             }
             
@@ -92,10 +100,14 @@ class VoteController extends AbstractController
         if (!empty($userId)) {
             $userInfo = $this->voteService->getUserByUserId($userId);
             
-            if ($userInfo !== null && isset($userInfo['userData']['pseudo'])) {
+            if ($userInfo !== null && !empty($userInfo['userData'])) {
+                $pseudo = $userInfo['userData']['pseudo'] ?? '';
+                $team = $userInfo['userData']['team'] ?? '';
+                
                 return new JsonResponse([
                     'success' => true,
-                    'pseudo' => $userInfo['userData']['pseudo'],
+                    'pseudo' => $pseudo,
+                    'team' => $team,
                     'votes' => $userInfo['userData']
                 ]);
             }
