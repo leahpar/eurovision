@@ -269,4 +269,46 @@ class VoteServiceTest extends TestCase
         $this->assertEqualsWithDelta(4.0, $teamRanking['DUM']['averageScore'], 0.01);
         $this->assertEquals(2, $teamRanking['DUM']['totalVotes']);
     }
+    
+    public function testPartialVoteUpdate(): void
+    {
+        // Configurer les données initiales
+        $initialData = [
+            'votes' => [
+                'testUser' => [
+                    'team' => 'Team Test 1',
+                    'scores' => [
+                        'TST' => 8,
+                        'DUM' => 5
+                    ]
+                ]
+            ]
+        ];
+        file_put_contents($this->votesFilePath, json_encode($initialData));
+        
+        // Forcer le rechargement des votes
+        $reflectionClass = new \ReflectionClass(VoteService::class);
+        $reflectionProperty = $reflectionClass->getProperty('votes');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue($this->voteService, null);
+        
+        // Update seulement un pays (TST)
+        $partialScores = [
+            'TST' => 10
+        ];
+        
+        // Sauvegarder les votes partiels
+        $result = $this->voteService->saveUserVotes('testUser', 'Team Test 1', $partialScores);
+        $this->assertTrue($result);
+        
+        // Vérifier que les deux pays sont toujours présents
+        $savedVotes = $this->voteService->getUserVotes('testUser');
+        $this->assertNotNull($savedVotes);
+        
+        // TST a été mis à jour
+        $this->assertEquals(10, $savedVotes['scores']['TST']);
+        
+        // DUM a été conservé
+        $this->assertEquals(5, $savedVotes['scores']['DUM']);
+    }
 }

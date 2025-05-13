@@ -85,10 +85,22 @@ class VoteService
             $this->loadVotes();
         }
 
-        // Préparation des nouvelles données de vote
+        // Récupération des données existantes de l'utilisateur
+        $existingUserData = $this->votes['votes'][$pseudo] ?? null;
+        $existingScores = [];
+
+        // Conserver les scores existants s'ils existent
+        if ($existingUserData !== null && isset($existingUserData['scores']) && is_array($existingUserData['scores'])) {
+            $existingScores = $existingUserData['scores'];
+        }
+
+        // Fusion des scores existants avec les nouveaux scores (les nouveaux remplacent les anciens pour chaque pays concerné)
+        $mergedScores = array_merge($existingScores, $scores);
+
+        // Préparation des données de vote mises à jour
         $userData = [
-            'team' => $team,
-            'scores' => $scores,
+            'team' => $team,  // On met à jour l'équipe au cas où elle aurait changé
+            'scores' => $mergedScores,
         ];
 
         // Mise à jour des votes
