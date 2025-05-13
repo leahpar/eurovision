@@ -10,13 +10,15 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class VoteServiceTest extends TestCase
 {
-    private $parameterBagMock;
-    private $filesystemMock;
-    private $configServiceMock;
-    private $voteService;
-    private $votesFilePath;
-    private $testPerformances;
-    private $testTeams;
+    private \PHPUnit\Framework\MockObject\MockObject $parameterBagMock;
+    private \PHPUnit\Framework\MockObject\MockObject $filesystemMock;
+    private \PHPUnit\Framework\MockObject\MockObject $configServiceMock;
+    private VoteService $voteService;
+    private string $votesFilePath;
+    /** @var array<string, array<string, string>> */
+    private array $testPerformances;
+    /** @var array<int, string> */
+    private array $testTeams;
 
     protected function setUp(): void
     {

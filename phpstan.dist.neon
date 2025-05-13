@@ -7,3 +7,5 @@ parameters:
         - src/
         - tests/
     treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        - '#Call to method PHPUnit\\Framework\\Assert::assertIsArray\(\) with array will always evaluate to true\.#'

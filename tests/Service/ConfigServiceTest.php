@@ -9,11 +9,12 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class ConfigServiceTest extends TestCase
 {
-    private $parameterBagMock;
-    private $filesystemMock;
-    private $configService;
-    private $configFilePath;
-    private $testConfigData;
+    private \PHPUnit\Framework\MockObject\MockObject $parameterBagMock;
+    private \PHPUnit\Framework\MockObject\MockObject $filesystemMock;
+    private ConfigService $configService;
+    private string $configFilePath;
+    /** @var array<string, mixed> */
+    private array $testConfigData;
 
     protected function setUp(): void
     {
