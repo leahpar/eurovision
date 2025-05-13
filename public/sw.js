@@ -1,52 +1,34 @@
-// Service Worker pour Eurovision Vote App
-const CACHE_NAME = 'eurovision-vote-cache-v1';
+// Service Worker minimal pour Eurovision Vote App
+const CACHE_NAME = 'eurovision-offline-cache-v1';
 
-// Fichiers à mettre en cache
-const urlsToCache = [
-  '/',
-  '/styles/app.css',
-  '/images/favicon.svg',
-  '/images/favicon-16x16.png',
-  '/images/favicon-32x32.png',
-  '/images/apple-touch-icon.png',
-  '/images/icon-192x192.png',
-  '/images/icon-512x512.png',
-  'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
-  'https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js'
-];
-
-// Installation du Service Worker
+// Installation du Service Worker - mettre en cache uniquement la page offline
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        return cache.addAll(urlsToCache);
+        return cache.add('/offline.html').catch(error => {
+          console.log('Erreur lors de la mise en cache de la page offline:', error);
+        });
       })
   );
 });
 
-// Stratégie de cache : Network First, fallback to cache
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    fetch(event.request)
-      .catch(() => {
-        return caches.match(event.request);
-      })
-  );
-});
-
-// Nettoyage des anciennes caches
+// Activation immédiate du Service Worker
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
+  event.waitUntil(self.clients.claim());
+});
+
+// Stratégie sans cache - uniquement pour servir la page offline en cas de déconnexion
+self.addEventListener('fetch', event => {
+  // N'intercepter que les requêtes de navigation (pas les assets, pas les API)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          // En cas d'échec de navigation (client offline), servir la page offline
+          return caches.match('/offline.html');
         })
-      );
-    })
-  );
+    );
+  }
+  // Laisser toutes les autres requêtes se comporter normalement
 });

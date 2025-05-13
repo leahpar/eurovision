@@ -29,16 +29,27 @@
         <!-- AlpineJS pour l'interactivité -->
         <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
         
-        <!-- Service Worker pour PWA -->
+        <!-- Service Worker minimaliste pour page offline -->
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js')
+                    navigator.serviceWorker.register('/sw.js', { scope: '/' })
                         .then(registration => {
-                            console.log('Service Worker enregistré avec succès:', registration);
+                            console.log('Service Worker enregistré');
+                            
+                            // Forcer la mise à jour du service worker à chaque chargement de page
+                            registration.update();
+                            
+                            // Rafraîchir automatiquement la page quand un nouveau SW est activé
+                            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                                if (navigator.serviceWorker.controller) {
+                                    window.location.reload();
+                                }
+                            });
                         })
                         .catch(error => {
-                            console.error('Erreur lors de l\'enregistrement du Service Worker:', error);
+                            // Ignorer silencieusement les erreurs - ne pas entraver l'expérience utilisateur
+                            console.log('Service Worker non enregistré');
                         });
                 });
             }
