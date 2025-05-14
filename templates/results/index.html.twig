@@ -249,7 +249,7 @@
                         <h4 class="text-sm font-medium text-gray-600">Le plus sévère</h4>
                         <div class="flex items-center">
                             <span class="font-bold text-gray-900" x-text="stats.harshestVoter?.pseudo"></span>
-                            <span class="text-sm text-gray-500 ml-2" x-text="'(Équipe ' + stats.harshestVoter?.team + ')'"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(' + stats.harshestVoter?.team + ')'"></span>
                             <span class="ml-auto text-sm bg-red-100 text-red-800 px-2 py-0.5 rounded-full" x-text="'Moy. ' + formatScore(stats.harshestVoter?.averageScore)"></span>
                         </div>
                     </div>
@@ -265,7 +265,7 @@
                         <h4 class="text-sm font-medium text-gray-600">Le plus généreux</h4>
                         <div class="flex items-center">
                             <span class="font-bold text-gray-900" x-text="stats.generousVoter?.pseudo"></span>
-                            <span class="text-sm text-gray-500 ml-2" x-text="'(Équipe ' + stats.generousVoter?.team + ')'"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(' + stats.generousVoter?.team + ')'"></span>
                             <span class="ml-auto text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded-full" x-text="'Moy. ' + formatScore(stats.generousVoter?.averageScore)"></span>
                         </div>
                     </div>
@@ -281,7 +281,7 @@
                         <h4 class="text-sm font-medium text-gray-600">Le plus constant</h4>
                         <div class="flex items-center">
                             <span class="font-bold text-gray-900" x-text="stats.consistentVoter?.pseudo"></span>
-                            <span class="text-sm text-gray-500 ml-2" x-text="'(Équipe ' + stats.consistentVoter?.team + ')'"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(' + stats.consistentVoter?.team + ')'"></span>
                             <span class="ml-auto text-sm bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full" x-text="'σ = ' + formatScore(stats.consistentVoter?.stdDeviation)"></span>
                         </div>
                     </div>
@@ -330,7 +330,7 @@
                         <h4 class="text-sm font-medium text-gray-600">Le plus radical</h4>
                         <div class="flex items-center">
                             <span class="font-bold text-gray-900" x-text="stats.variedVoter?.pseudo"></span>
-                            <span class="text-sm text-gray-500 ml-2" x-text="'(Équipe ' + stats.variedVoter?.team + ')'"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(' + stats.variedVoter?.team + ')'"></span>
                             <span class="ml-auto text-sm bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full" x-text="'σ = ' + formatScore(stats.variedVoter?.stdDeviation)"></span>
                         </div>
                     </div>
@@ -357,9 +357,9 @@
                 </div>
                 
                 <div x-show="stats.oppositeVoters" class="flex items-center space-x-2">
-                    <div class="rounded-full bg-orange-100 p-2">
-                        <svg class="w-5 h-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" />
+                    <div class="rounded-full bg-red-100 p-2">
+                        <svg class="w-5 h-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path fill-rule="evenodd" d="M15.97 2.47a.75.75 0 011.06 0l4.5 4.5a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 11-1.06-1.06l3.22-3.22H7.5a.75.75 0 010-1.5h11.69l-3.22-3.22a.75.75 0 010-1.06zm-7.94 9a.75.75 0 010 1.06l-3.22 3.22H16.5a.75.75 0 010 1.5H4.81l3.22 3.22a.75.75 0 11-1.06 1.06l-4.5-4.5a.75.75 0 010-1.06l4.5-4.5a.75.75 0 011.06 0z" clip-rule="evenodd" />
                         </svg>
                     </div>
                     <div>
@@ -370,7 +370,7 @@
                             <span class="text-gray-500 mx-1">et</span>
                             <span class="font-bold text-gray-900" x-text="stats.oppositeVoters?.voter2.pseudo"></span>
                             <span class="text-sm text-gray-500 ml-1" x-text="'(' + stats.oppositeVoters?.voter2.team + ')'"></span>
-                            <span class="ml-auto text-sm bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full" x-text="'Différence: ' + Math.round((1 - stats.oppositeVoters?.similarity) * 100) + '%'"></span>
+                            <span class="ml-auto text-sm bg-red-100 text-red-800 px-2 py-0.5 rounded-full" x-text="'Différence: ' + Math.round((1 - stats.oppositeVoters?.similarity) * 100) + '%'"></span>
                         </div>
                     </div>
                 </div>
@@ -387,7 +387,7 @@
                         <h4 class="text-sm font-medium text-gray-600">Le plus mainstream</h4>
                         <div class="flex items-center">
                             <span class="font-bold text-gray-900" x-text="stats.mainstreamVoter?.pseudo"></span>
-                            <span class="text-sm text-gray-500 ml-2" x-text="'(Équipe ' + stats.mainstreamVoter?.team + ')'"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(' + stats.mainstreamVoter?.team + ')'"></span>
                             <span class="ml-auto text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" x-text="'Écart moyen: ' + formatScore(stats.mainstreamVoter?.deviation)"></span>
                         </div>
                     </div>
@@ -403,7 +403,7 @@
                         <h4 class="text-sm font-medium text-gray-600">Le plus underground</h4>
                         <div class="flex items-center">
                             <span class="font-bold text-gray-900" x-text="stats.undergroundVoter?.pseudo"></span>
-                            <span class="text-sm text-gray-500 ml-2" x-text="'(Équipe ' + stats.undergroundVoter?.team + ')'"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(' + stats.undergroundVoter?.team + ')'"></span>
                             <span class="ml-auto text-sm bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full" x-text="'Écart moyen: ' + formatScore(stats.undergroundVoter?.deviation)"></span>
                         </div>
                     </div>
