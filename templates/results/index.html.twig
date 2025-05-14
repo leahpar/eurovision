@@ -271,6 +271,38 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="flex items-center space-x-2" x-show="stats.consistentVoter">
+                    <div class="rounded-full bg-indigo-100 p-2">
+                        <svg class="w-5 h-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-600">Le plus constant</h4>
+                        <div class="flex items-center">
+                            <span class="font-bold text-gray-900" x-text="stats.consistentVoter?.pseudo"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(Équipe ' + stats.consistentVoter?.team + ')'"></span>
+                            <span class="ml-auto text-sm bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full" x-text="'σ = ' + formatScore(stats.consistentVoter?.stdDeviation)"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-2" x-show="stats.variedVoter">
+                    <div class="rounded-full bg-purple-100 p-2">
+                        <svg class="w-5 h-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-600">Le plus radical</h4>
+                        <div class="flex items-center">
+                            <span class="font-bold text-gray-900" x-text="stats.variedVoter?.pseudo"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(Équipe ' + stats.variedVoter?.team + ')'"></span>
+                            <span class="ml-auto text-sm bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full" x-text="'σ = ' + formatScore(stats.variedVoter?.stdDeviation)"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Pays -->

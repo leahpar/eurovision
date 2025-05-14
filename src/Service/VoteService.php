@@ -589,6 +589,118 @@ class VoteService
         // Retourne le pays avec la plus petite différence entre notes
         return reset($consensualCountries);
     }
+    
+    /**
+     * Identifie le votant le plus constant (écart-type le plus bas dans ses votes)
+     * 
+     * @param string|null $team Équipe à filtrer (optionnel)
+     * @return array{pseudo: string, team: string, stdDeviation: float}|null
+     */
+    public function getMostConsistentVoter(?string $team = null): ?array
+    {
+        $votes = $this->getAllVotes();
+        if (empty($votes)) {
+            return null;
+        }
+        
+        $voterStats = [];
+        
+        foreach ($votes as $userId => $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || count($userData['scores']) < 2 || !isset($userData['pseudo'])) {
+                continue;
+            }
+            
+            $scores = array_values($userData['scores']);
+            $mean = array_sum($scores) / count($scores);
+            $variance = 0;
+            
+            foreach ($scores as $score) {
+                $variance += pow($score - $mean, 2);
+            }
+            
+            $variance /= count($scores);
+            $stdDeviation = sqrt($variance);
+            
+            $voterStats[$userId] = [
+                'pseudo' => $userData['pseudo'],
+                'team' => $userData['team'] ?? 'Inconnue',
+                'stdDeviation' => $stdDeviation
+            ];
+        }
+        
+        if (empty($voterStats)) {
+            return null;
+        }
+        
+        // Tri par écart-type croissant (le plus constant d'abord)
+        uasort($voterStats, function ($a, $b) {
+            return $a['stdDeviation'] <=> $b['stdDeviation'];
+        });
+        
+        // Retourne le votant avec l'écart-type le plus bas
+        return reset($voterStats);
+    }
+    
+    /**
+     * Identifie le votant le plus radical (écart-type le plus élevé dans ses votes)
+     * 
+     * @param string|null $team Équipe à filtrer (optionnel)
+     * @return array{pseudo: string, team: string, stdDeviation: float}|null
+     */
+    public function getMostVariedVoter(?string $team = null): ?array
+    {
+        $votes = $this->getAllVotes();
+        if (empty($votes)) {
+            return null;
+        }
+        
+        $voterStats = [];
+        
+        foreach ($votes as $userId => $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || count($userData['scores']) < 2 || !isset($userData['pseudo'])) {
+                continue;
+            }
+            
+            $scores = array_values($userData['scores']);
+            $mean = array_sum($scores) / count($scores);
+            $variance = 0;
+            
+            foreach ($scores as $score) {
+                $variance += pow($score - $mean, 2);
+            }
+            
+            $variance /= count($scores);
+            $stdDeviation = sqrt($variance);
+            
+            $voterStats[$userId] = [
+                'pseudo' => $userData['pseudo'],
+                'team' => $userData['team'] ?? 'Inconnue',
+                'stdDeviation' => $stdDeviation
+            ];
+        }
+        
+        if (empty($voterStats)) {
+            return null;
+        }
+        
+        // Tri par écart-type décroissant (le plus radical d'abord)
+        uasort($voterStats, function ($a, $b) {
+            return $b['stdDeviation'] <=> $a['stdDeviation'];
+        });
+        
+        // Retourne le votant avec l'écart-type le plus élevé
+        return reset($voterStats);
+    }
 
     /**
      * Charge les votes depuis le fichier JSON.

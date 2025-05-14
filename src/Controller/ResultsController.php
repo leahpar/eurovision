@@ -123,6 +123,17 @@ class ResultsController extends AbstractController
                 $stats['consensualCountry'] = $consensualCountry;
             }
             
+            // Ajout des nouvelles statistiques sur les votants
+            $consistentVoter = $this->voteService->getMostConsistentVoter(!empty($team) ? $team : null);
+            if ($consistentVoter) {
+                $stats['consistentVoter'] = $consistentVoter;
+            }
+            
+            $variedVoter = $this->voteService->getMostVariedVoter(!empty($team) ? $team : null);
+            if ($variedVoter) {
+                $stats['variedVoter'] = $variedVoter;
+            }
+            
             return new JsonResponse([
                 'success' => true,
                 'ranking' => array_values($ranking),
