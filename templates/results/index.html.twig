@@ -34,6 +34,10 @@
                 this.autoRefreshEnabled = !this.autoRefreshEnabled;
                 
                 if (this.autoRefreshEnabled) {
+                    // Déclenche un refresh immédiat
+                    this.loadResults();
+                    this.loadTeamsStats();
+                    
                     // Active le refresh automatique toutes les 10 secondes
                     this.autoRefreshInterval = setInterval(() => {
                         this.loadResults();
