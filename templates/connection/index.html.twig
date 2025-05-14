@@ -17,14 +17,27 @@
             userId: '',
             
             init() {
-                // Récupérer les données sauvegardées dans le localStorage
-                const savedData = localStorage.getItem('eurovisionUser');
-                if (savedData) {
-                    const userData = JSON.parse(savedData);
-                    this.pseudo = userData.pseudo || '';
-                    this.team = userData.team || '';
-                    this.userId = userData.userId || '';
-                }
+                // Vérifier d'abord si des données utilisateur sont passées depuis le serveur (reconnexion)
+                {% if userInfo is defined and userInfo %}
+                    this.pseudo = '{{ userInfo.userData.pseudo }}';
+                    this.team = '{{ userInfo.userData.team }}';
+                    this.userId = '{{ userInfo.userId }}';
+                    // Mettre à jour le localStorage
+                    localStorage.setItem('eurovisionUser', JSON.stringify({
+                        pseudo: this.pseudo,
+                        team: this.team,
+                        userId: this.userId
+                    }));
+                {% else %}
+                    // Sinon, récupérer les données sauvegardées dans le localStorage
+                    const savedData = localStorage.getItem('eurovisionUser');
+                    if (savedData) {
+                        const userData = JSON.parse(savedData);
+                        this.pseudo = userData.pseudo || '';
+                        this.team = userData.team || '';
+                        this.userId = userData.userId || '';
+                    }
+                {% endif %}
             },
             
             async submit() {
@@ -83,9 +96,21 @@
     <div class="text-center mb-4">
         <img src="{{ asset('images/logo.svg') }}" alt="Eurovision Vote" class="mx-auto h-24 w-auto mb-4">
         <h2 class="text-xl text-gray-600">
-            Bienvenue ! Pour commencer, identifiez-vous
+            {% if userInfo is defined and userInfo %}
+                Bon retour parmi nous ! Vous pouvez continuer à voter.
+            {% else %}
+                Bienvenue ! Pour commencer, identifiez-vous
+            {% endif %}
         </h2>
     </div>
+    
+    {% if app.request.get('error') %}
+        <div class="w-full max-w-md">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4 rounded">
+                <p class="text-sm text-red-700">{{ app.request.get('error') }}</p>
+            </div>
+        </div>
+    {% endif %}
 
     <div class="w-full max-w-md">
         <div class="bg-white py-8 px-4 shadow-lg rounded-lg sm:px-10 transform transition-all hover:shadow-xl" x-data="connectionForm">
@@ -137,7 +162,11 @@
                             Chargement...
                         </span>
                         <span x-show="!isSubmitting">
-                            Commencer à voter
+                            {% if userInfo is defined and userInfo %}
+                                Continuer à voter
+                            {% else %}
+                                Commencer à voter
+                            {% endif %}
                         </span>
                     </button>
                 </div>

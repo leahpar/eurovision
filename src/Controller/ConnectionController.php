@@ -30,6 +30,36 @@ class ConnectionController extends AbstractController
             'teams' => $teams,
         ]);
     }
+    
+    #[Route('/reconnexion/{userId}', name: 'app_reconnexion')]
+    public function reconnexion(string $userId): Response
+    {
+        // Récupérer les données utilisateur
+        $userInfo = $this->voteService->getUserByUserId($userId);
+        
+        // Si l'utilisateur n'existe pas, rediriger vers la page d'accueil
+        if ($userInfo === null) {
+            $this->addFlash('error', 'Utilisateur non trouvé. Veuillez vous reconnecter.');
+            return $this->redirectToRoute('app_home');
+        }
+        
+        // Récupérer les données nécessaires pour la page de connexion
+        $edition = $this->configService->getEdition();
+        $teams = $this->configService->getTeams();
+        
+        // Rendre la vue avec les données pré-remplies
+        return $this->render('connection/index.html.twig', [
+            'edition' => $edition,
+            'teams' => $teams,
+            'userInfo' => [
+                'userId' => $userInfo['userId'],
+                'userData' => [
+                    'pseudo' => $userInfo['userData']['pseudo'],
+                    'team' => $userInfo['userData']['team']
+                ]
+            ]
+        ]);
+    }
 
     #[Route('/api/validate-connection', name: 'api_validate_connection', methods: ['POST'])]
     public function validateConnection(Request $request): JsonResponse
@@ -101,7 +131,7 @@ class ConnectionController extends AbstractController
         
         return new JsonResponse([
             'success' => true,
-            'pseudo' => $userInfo['pseudo'],
+            'pseudo' => $userInfo['userData']['pseudo'],
             'team' => $userInfo['userData']['team']
         ]);
     }
