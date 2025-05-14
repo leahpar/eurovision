@@ -246,7 +246,7 @@
                             <template x-for="n in 11" :key="n-1">
                                 <button 
                                     @click="setScore(countryCode, n-1)" 
-                                    :class="{'active': isActive(countryCode, n-1), 'bg-indigo-50': n-1 % 2 === 0 && !isActive(countryCode, n-1)}" 
+                                    :class="{'active': isActive(countryCode, n-1), 'bg-indigo-50': n-1 % 2 === 0 && !isActive(countryCode, n-1), 'hidden': n-1 === 0}" 
                                     class="score-button h-8 flex items-center justify-center border border-gray-300 rounded-md focus:outline-none hover:bg-gray-100">
                                     <span x-text="n-1"></span>
                                 </button>
