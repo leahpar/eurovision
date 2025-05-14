@@ -56,8 +56,20 @@ class ResultsController extends AbstractController
             // Agréger quelques statistiques simples
             $stats = [
                 'totalVotes' => 0,
-                'totalVoters' => count($this->voteService->getAllVotes())
+                'totalVoters' => 0
             ];
+            
+            // Compter uniquement les votants de l'équipe sélectionnée si un filtre est appliqué
+            $allVotes = $this->voteService->getAllVotes();
+            if (!empty($team)) {
+                foreach ($allVotes as $userData) {
+                    if (isset($userData['team']) && $userData['team'] === $team) {
+                        $stats['totalVoters']++;
+                    }
+                }
+            } else {
+                $stats['totalVoters'] = count($allVotes);
+            }
             
             foreach ($ranking as $data) {
                 $stats['totalVotes'] += $data['totalVotes'];
