@@ -199,7 +199,7 @@
 </script>
 {% endblock %}
 
-    <div class="px-1 sm:px-2">
+    <div class="px-0.5 sm:px-2 md:px-3">
     <!-- Message de notification -->
     <div x-show="message" 
          :class="{
@@ -220,11 +220,11 @@
     </div>
 
     <!-- Grid de pays -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" x-show="!isLoading">
+    <div class="grid grid-cols-1 gap-y-4 gap-x-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" x-show="!isLoading">
         <template x-for="(performance, countryCode) in performances" :key="countryCode">
-            <div :class="{'bg-white': getScore(countryCode) > 0, 'bg-gray-100 border-2 border-dashed border-gray-300': getScore(countryCode) === 0}" 
+            <div :class="{'bg-white': getScore(countryCode) > 0, 'bg-gray-100': getScore(countryCode) === 0}" 
                 class="overflow-hidden shadow rounded-lg hover:shadow-lg transition-all vote-card relative">
-                <div class="px-3 py-3 sm:p-4">
+                <div class="px-2 py-4 sm:px-3 sm:py-4">
                     <div class="flex">
                         <span class="text-5xl mr-3 flex-shrink-0" x-text="performance.flag"></span>
                         <div class="flex-1 min-w-0">
