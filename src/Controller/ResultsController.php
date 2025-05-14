@@ -134,6 +134,17 @@ class ResultsController extends AbstractController
                 $stats['variedVoter'] = $variedVoter;
             }
             
+            // Ajout des nouvelles statistiques fun
+            $twinVoters = $this->voteService->getMostSimilarVoters(!empty($team) ? $team : null);
+            if ($twinVoters) {
+                $stats['twinVoters'] = $twinVoters;
+            }
+            
+            $oppositeVoters = $this->voteService->getMostDifferentVoters(!empty($team) ? $team : null);
+            if ($oppositeVoters) {
+                $stats['oppositeVoters'] = $oppositeVoters;
+            }
+            
             return new JsonResponse([
                 'success' => true,
                 'ranking' => array_values($ranking),

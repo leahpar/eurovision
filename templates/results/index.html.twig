@@ -340,6 +340,46 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Les jumeaux -->
+                <div class="flex items-center space-x-2 mt-4" x-show="stats.twinVoters">
+                    <div class="rounded-full bg-pink-100 p-2">
+                        <svg class="w-5 h-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-600">Les jumeaux (votes similaires)</h4>
+                        <div class="flex flex-wrap items-center">
+                            <span class="font-bold text-gray-900" x-text="stats.twinVoters?.voter1.pseudo"></span>
+                            <span class="text-sm text-gray-500 ml-1 mr-2" x-text="'(' + stats.twinVoters?.voter1.team + ')'"></span>
+                            <span class="text-gray-500 mx-1">et</span>
+                            <span class="font-bold text-gray-900" x-text="stats.twinVoters?.voter2.pseudo"></span>
+                            <span class="text-sm text-gray-500 ml-1" x-text="'(' + stats.twinVoters?.voter2.team + ')'"></span>
+                            <span class="ml-auto text-sm bg-pink-100 text-pink-800 px-2 py-0.5 rounded-full" x-text="'Similarité: ' + Math.round(stats.twinVoters?.similarity * 100) + '%'"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Les opposés -->
+                <div class="flex items-center space-x-2 mt-4" x-show="stats.oppositeVoters">
+                    <div class="rounded-full bg-orange-100 p-2">
+                        <svg class="w-5 h-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-600">Les opposés (votes différents)</h4>
+                        <div class="flex flex-wrap items-center">
+                            <span class="font-bold text-gray-900" x-text="stats.oppositeVoters?.voter1.pseudo"></span>
+                            <span class="text-sm text-gray-500 ml-1 mr-2" x-text="'(' + stats.oppositeVoters?.voter1.team + ')'"></span>
+                            <span class="text-gray-500 mx-1">et</span>
+                            <span class="font-bold text-gray-900" x-text="stats.oppositeVoters?.voter2.pseudo"></span>
+                            <span class="text-sm text-gray-500 ml-1" x-text="'(' + stats.oppositeVoters?.voter2.team + ')'"></span>
+                            <span class="ml-auto text-sm bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full" x-text="'Différence: ' + Math.round((1 - stats.oppositeVoters?.similarity) * 100) + '%'"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -701,6 +701,182 @@ class VoteService
         // Retourne le votant avec l'écart-type le plus élevé
         return reset($voterStats);
     }
+    
+    /**
+     * Identifie les deux votants avec les votes les plus similaires (jumeaux)
+     * 
+     * @param string|null $team Équipe à filtrer (optionnel)
+     * @return array{voter1: array{pseudo: string, team: string}, voter2: array{pseudo: string, team: string}, similarity: float}|null
+     */
+    public function getMostSimilarVoters(?string $team = null): ?array
+    {
+        $votes = $this->getAllVotes();
+        if (empty($votes) || count($votes) < 2) {
+            return null;
+        }
+        
+        $voterScores = [];
+        
+        // Étape 1: Collecter tous les scores par votant
+        foreach ($votes as $userId => $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || count($userData['scores']) < 3 || !isset($userData['pseudo'])) {
+                continue;
+            }
+            
+            $voterScores[$userId] = [
+                'pseudo' => $userData['pseudo'],
+                'team' => $userData['team'] ?? 'Inconnue',
+                'scores' => $userData['scores']
+            ];
+        }
+        
+        if (count($voterScores) < 2) {
+            return null;
+        }
+        
+        $highestSimilarity = -1;
+        $mostSimilarPair = null;
+        
+        // Étape 2: Comparer chaque paire de votants
+        $voterIds = array_keys($voterScores);
+        for ($i = 0; $i < count($voterIds) - 1; $i++) {
+            for ($j = $i + 1; $j < count($voterIds); $j++) {
+                $voter1Id = $voterIds[$i];
+                $voter2Id = $voterIds[$j];
+                
+                $voter1 = $voterScores[$voter1Id];
+                $voter2 = $voterScores[$voter2Id];
+                
+                // Calculer la similarité
+                $similarity = $this->calculateVoterSimilarity($voter1['scores'], $voter2['scores']);
+                
+                if ($similarity > $highestSimilarity) {
+                    $highestSimilarity = $similarity;
+                    $mostSimilarPair = [
+                        'voter1' => [
+                            'pseudo' => $voter1['pseudo'],
+                            'team' => $voter1['team']
+                        ],
+                        'voter2' => [
+                            'pseudo' => $voter2['pseudo'],
+                            'team' => $voter2['team']
+                        ],
+                        'similarity' => $similarity
+                    ];
+                }
+            }
+        }
+        
+        return $mostSimilarPair;
+    }
+    
+    /**
+     * Identifie les deux votants avec les votes les plus différents (opposés)
+     * 
+     * @param string|null $team Équipe à filtrer (optionnel)
+     * @return array{voter1: array{pseudo: string, team: string}, voter2: array{pseudo: string, team: string}, similarity: float}|null
+     */
+    public function getMostDifferentVoters(?string $team = null): ?array
+    {
+        $votes = $this->getAllVotes();
+        if (empty($votes) || count($votes) < 2) {
+            return null;
+        }
+        
+        $voterScores = [];
+        
+        // Étape 1: Collecter tous les scores par votant
+        foreach ($votes as $userId => $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || count($userData['scores']) < 3 || !isset($userData['pseudo'])) {
+                continue;
+            }
+            
+            $voterScores[$userId] = [
+                'pseudo' => $userData['pseudo'],
+                'team' => $userData['team'] ?? 'Inconnue',
+                'scores' => $userData['scores']
+            ];
+        }
+        
+        if (count($voterScores) < 2) {
+            return null;
+        }
+        
+        $lowestSimilarity = 2; // Une valeur supérieure à 1 pour garantir qu'elle sera remplacée
+        $mostDifferentPair = null;
+        
+        // Étape 2: Comparer chaque paire de votants
+        $voterIds = array_keys($voterScores);
+        for ($i = 0; $i < count($voterIds) - 1; $i++) {
+            for ($j = $i + 1; $j < count($voterIds); $j++) {
+                $voter1Id = $voterIds[$i];
+                $voter2Id = $voterIds[$j];
+                
+                $voter1 = $voterScores[$voter1Id];
+                $voter2 = $voterScores[$voter2Id];
+                
+                // Calculer la similarité
+                $similarity = $this->calculateVoterSimilarity($voter1['scores'], $voter2['scores']);
+                
+                if ($similarity < $lowestSimilarity) {
+                    $lowestSimilarity = $similarity;
+                    $mostDifferentPair = [
+                        'voter1' => [
+                            'pseudo' => $voter1['pseudo'],
+                            'team' => $voter1['team']
+                        ],
+                        'voter2' => [
+                            'pseudo' => $voter2['pseudo'],
+                            'team' => $voter2['team']
+                        ],
+                        'similarity' => $similarity
+                    ];
+                }
+            }
+        }
+        
+        return $mostDifferentPair;
+    }
+    
+    /**
+     * Calcule la similarité entre deux ensembles de votes
+     * Plus le résultat est proche de 1, plus les votes sont similaires
+     * 
+     * @param array<string, int> $scores1 Premier ensemble de scores
+     * @param array<string, int> $scores2 Deuxième ensemble de scores
+     * @return float Indice de similarité entre 0 et 1
+     */
+    private function calculateVoterSimilarity(array $scores1, array $scores2): float
+    {
+        // Trouver les pays communs votés par les deux utilisateurs
+        $commonCountries = array_intersect(array_keys($scores1), array_keys($scores2));
+        
+        if (empty($commonCountries)) {
+            return 0; // Aucun pays en commun
+        }
+        
+        // Calculer la similarité basée sur la différence de notes
+        $totalDifference = 0;
+        $maxPossibleDifference = count($commonCountries) * 10; // 10 est la différence maximale possible (0 vs 10)
+        
+        foreach ($commonCountries as $countryCode) {
+            $difference = abs($scores1[$countryCode] - $scores2[$countryCode]);
+            $totalDifference += $difference;
+        }
+        
+        // Transformer en similarité: 1 - (différence / différence maximale possible)
+        return 1 - ($totalDifference / $maxPossibleDifference);
+    }
 
     /**
      * Charge les votes depuis le fichier JSON.
