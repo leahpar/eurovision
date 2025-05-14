@@ -877,6 +877,136 @@ class VoteService
         // Transformer en similarité: 1 - (différence / différence maximale possible)
         return 1 - ($totalDifference / $maxPossibleDifference);
     }
+    
+    /**
+     * Identifie le votant le plus mainstream (notes les plus proches de la moyenne)
+     * 
+     * @param string|null $team Équipe à filtrer (optionnel)
+     * @return array{pseudo: string, team: string, deviation: float}|null
+     */
+    public function getMostMainstreamVoter(?string $team = null): ?array
+    {
+        $votes = $this->getAllVotes();
+        if (empty($votes)) {
+            return null;
+        }
+        
+        // Obtenir le classement moyen pour avoir les scores moyens par pays
+        $ranking = $this->calculateRanking();
+        
+        $voterDeviations = [];
+        
+        foreach ($votes as $userId => $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || count($userData['scores']) < 3 || !isset($userData['pseudo'])) {
+                continue;
+            }
+            
+            $totalDeviation = 0;
+            $countedScores = 0;
+            
+            foreach ($userData['scores'] as $countryCode => $score) {
+                if (isset($ranking[$countryCode]) && $ranking[$countryCode]['totalVotes'] > 0) {
+                    $avgScore = $ranking[$countryCode]['averageScore'];
+                    $deviation = abs($score - $avgScore);
+                    $totalDeviation += $deviation;
+                    $countedScores++;
+                }
+            }
+            
+            // Seulement calculer si l'utilisateur a voté pour des pays avec des moyennes
+            if ($countedScores > 0) {
+                $avgDeviation = $totalDeviation / $countedScores;
+                
+                $voterDeviations[$userId] = [
+                    'pseudo' => $userData['pseudo'],
+                    'team' => $userData['team'] ?? 'Inconnue',
+                    'deviation' => $avgDeviation
+                ];
+            }
+        }
+        
+        if (empty($voterDeviations)) {
+            return null;
+        }
+        
+        // Tri par écart moyen croissant (le moins déviant = le plus mainstream)
+        uasort($voterDeviations, function ($a, $b) {
+            return $a['deviation'] <=> $b['deviation'];
+        });
+        
+        // Retourne le votant avec l'écart moyen le plus faible
+        return reset($voterDeviations);
+    }
+    
+    /**
+     * Identifie le votant le plus underground (notes les plus éloignées de la moyenne)
+     * 
+     * @param string|null $team Équipe à filtrer (optionnel)
+     * @return array{pseudo: string, team: string, deviation: float}|null
+     */
+    public function getMostUndergroundVoter(?string $team = null): ?array
+    {
+        $votes = $this->getAllVotes();
+        if (empty($votes)) {
+            return null;
+        }
+        
+        // Obtenir le classement moyen pour avoir les scores moyens par pays
+        $ranking = $this->calculateRanking();
+        
+        $voterDeviations = [];
+        
+        foreach ($votes as $userId => $userData) {
+            // Filtrer par équipe si demandé
+            if ($team !== null && (!isset($userData['team']) || $userData['team'] !== $team)) {
+                continue;
+            }
+            
+            if (!isset($userData['scores']) || !is_array($userData['scores']) || count($userData['scores']) < 3 || !isset($userData['pseudo'])) {
+                continue;
+            }
+            
+            $totalDeviation = 0;
+            $countedScores = 0;
+            
+            foreach ($userData['scores'] as $countryCode => $score) {
+                if (isset($ranking[$countryCode]) && $ranking[$countryCode]['totalVotes'] > 0) {
+                    $avgScore = $ranking[$countryCode]['averageScore'];
+                    $deviation = abs($score - $avgScore);
+                    $totalDeviation += $deviation;
+                    $countedScores++;
+                }
+            }
+            
+            // Seulement calculer si l'utilisateur a voté pour des pays avec des moyennes
+            if ($countedScores > 0) {
+                $avgDeviation = $totalDeviation / $countedScores;
+                
+                $voterDeviations[$userId] = [
+                    'pseudo' => $userData['pseudo'],
+                    'team' => $userData['team'] ?? 'Inconnue',
+                    'deviation' => $avgDeviation
+                ];
+            }
+        }
+        
+        if (empty($voterDeviations)) {
+            return null;
+        }
+        
+        // Tri par écart moyen décroissant (le plus déviant = le plus underground)
+        uasort($voterDeviations, function ($a, $b) {
+            return $b['deviation'] <=> $a['deviation'];
+        });
+        
+        // Retourne le votant avec l'écart moyen le plus élevé
+        return reset($voterDeviations);
+    }
 
     /**
      * Charge les votes depuis le fichier JSON.

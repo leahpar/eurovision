@@ -145,6 +145,17 @@ class ResultsController extends AbstractController
                 $stats['oppositeVoters'] = $oppositeVoters;
             }
             
+            // Ajout des statistiques mainstream et underground
+            $mainstreamVoter = $this->voteService->getMostMainstreamVoter(!empty($team) ? $team : null);
+            if ($mainstreamVoter) {
+                $stats['mainstreamVoter'] = $mainstreamVoter;
+            }
+            
+            $undergroundVoter = $this->voteService->getMostUndergroundVoter(!empty($team) ? $team : null);
+            if ($undergroundVoter) {
+                $stats['undergroundVoter'] = $undergroundVoter;
+            }
+            
             return new JsonResponse([
                 'success' => true,
                 'ranking' => array_values($ranking),
