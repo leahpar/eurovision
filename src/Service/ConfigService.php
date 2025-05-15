@@ -8,7 +8,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class ConfigService
 {
     private string $configFilePath;
-    /** @var array<string, mixed>|null */
+    /** @var array{eurovision: array{edition: string, teams: list<string>, performances: array<string, array{name: string, artist: string, song: string, flag: string}>}}|null */
     private ?array $config = null;
 
     public function __construct(
@@ -21,7 +21,7 @@ class ConfigService
     /**
      * Récupère toute la configuration.
      * 
-     * @return array<string, mixed>
+     * @return array{eurovision: array{edition: string, teams: list<string>, performances: array<string, array{name: string, artist: string, song: string, flag: string}>}}
      */
     public function getConfig(): array
     {
@@ -43,7 +43,7 @@ class ConfigService
     /**
      * Récupère la liste des équipes.
      * 
-     * @return array<int, string>
+     * @return list<string>
      */
     public function getTeams(): array
     {
@@ -53,7 +53,7 @@ class ConfigService
     /**
      * Récupère la liste des performances.
      * 
-     * @return array<string, array<string, string>>
+     * @return array<string, array{name: string, artist: string, song: string, flag: string}>
      */
     public function getPerformances(): array
     {
@@ -63,7 +63,7 @@ class ConfigService
     /**
      * Récupère une performance spécifique par son code pays.
      * 
-     * @return array<string, string>|null
+     * @return array{name: string, artist: string, song: string, flag: string}|null
      */
     public function getPerformance(string $countryCode): ?array
     {
@@ -73,6 +73,8 @@ class ConfigService
 
     /**
      * Charge la configuration depuis le fichier JSON.
+     * 
+     * @throws \RuntimeException Si le fichier n'existe pas, n'est pas lisible ou n'est pas un JSON valide
      */
     private function loadConfig(): void
     {
