@@ -139,7 +139,7 @@
                         Pseudo
                     </label>
                     <div class="mt-1">
-                        <input id="pseudo" name="pseudo" type="text" x-model="pseudo" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <input id="pseudo" name="pseudo" type="text" x-model="pseudo" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm">
                     </div>
                     <p x-show="errors.pseudo" x-text="errors.pseudo" class="mt-2 text-sm text-red-600" x-cloak></p>
                 </div>
@@ -149,7 +149,7 @@
                         Équipe
                     </label>
                     <div class="mt-1">
-                        <select id="team" name="team" x-model="team" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <select id="team" name="team" x-model="team" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm">
                             <option value="">Sélectionnez une équipe</option>
                             {% for team in teams %}
                                 <option value="{{ team }}">{{ team }}</option>
@@ -160,7 +160,7 @@
                 </div>
 
                 <div>
-                    <button @click="submit" :disabled="isSubmitting" type="button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                    <button @click="submit" :disabled="isSubmitting" type="button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-pink-500 via-yellow-400 to-blue-500 hover:from-pink-600 hover:via-yellow-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors">
                         <span x-show="isSubmitting">
                             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
