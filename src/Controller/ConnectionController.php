@@ -19,8 +19,11 @@ class ConnectionController extends AbstractController
     }
 
     #[Route('/', name: 'app_home')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        // Vérifier si un userId est présent dans le localStorage via JS
+        // La vérification réelle sera effectuée côté client
+        
         // Récupérer les données nécessaires pour la page d'accueil
         $edition = $this->configService->getEdition();
         $teams = $this->configService->getTeams();
@@ -28,6 +31,7 @@ class ConnectionController extends AbstractController
         return $this->render('connection/index.html.twig', [
             'edition' => $edition,
             'teams' => $teams,
+            'checkUserSession' => true
         ]);
     }
     

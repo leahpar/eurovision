@@ -36,6 +36,13 @@
                         this.pseudo = userData.pseudo || '';
                         this.team = userData.team || '';
                         this.userId = userData.userId || '';
+                        
+                        // Si on est sur la page d'accueil et que l'on a un userId stocké, rediriger vers la page de vote
+                        {% if checkUserSession is defined and checkUserSession %}
+                        if (userData.userId) {
+                            window.location.href = '{{ path('app_vote') }}';
+                        }
+                        {% endif %}
                     }
                 {% endif %}
             },
