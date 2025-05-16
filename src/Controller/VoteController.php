@@ -19,17 +19,17 @@ class VoteController extends AbstractController
     }
 
     #[Route('/vote', name: 'app_vote')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         // Récupérer les données nécessaires pour la page de vote
         $edition = $this->configService->getEdition();
         $performances = $this->configService->getPerformances();
-
+        
         // Trier les performances par ordre alphabétique du nom de pays
         uasort($performances, function ($a, $b) {
             return $a['name'] <=> $b['name'];
         });
-
+        
         return $this->render('vote/index.html.twig', [
             'edition' => $edition,
             'performances' => $performances,
@@ -54,6 +54,16 @@ class VoteController extends AbstractController
         
         try {
             $userInfo = $this->voteService->getUserByUserId($userId);
+            
+            // Vérifier que l'utilisateur existe toujours
+            if ($userInfo === null) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Votre compte a été supprimé',
+                    'userDeleted' => true
+                ], 401);
+            }
+            
             $pseudo = $userInfo['userData']['pseudo'];
             $team = $userInfo['userData']['team'];
 
@@ -96,6 +106,13 @@ class VoteController extends AbstractController
                     'votes' => $userInfo['userData'],
                     'userId' => $userId
                 ]);
+            } else {
+                // L'utilisateur a été supprimé
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Votre compte a été supprimé',
+                    'userDeleted' => true
+                ], 401);
             }
         }
         
