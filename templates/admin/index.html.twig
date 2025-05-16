@@ -6,6 +6,36 @@
 
 {% block body %}
 <div class="container mx-auto py-4" x-data="adminApp()">
+    <!-- Message flottant -->
+    <div 
+        x-show="message" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform scale-90"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-300"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-90"
+        class="fixed top-4 right-4 max-w-md p-4 rounded-lg shadow-lg z-50" 
+        :class="{'bg-green-100 text-green-700 border-l-4 border-green-500': success, 'bg-red-100 text-red-700 border-l-4 border-red-500': !success}">
+        <div class="flex items-center">
+            <span x-show="success" class="mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+            </span>
+            <span x-show="!success" class="mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </span>
+            <p x-text="message"></p>
+            <button @click="message = ''" class="ml-auto text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
 
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
         <h2 class="text-2xl font-bold mb-4">Réinitialisation des votes</h2>
@@ -16,9 +46,7 @@
             <span x-show="processing">Traitement en cours...</span>
         </button>
         
-        <div x-show="message" class="mt-4 p-3" :class="{'bg-green-100 text-green-700': success, 'bg-red-100 text-red-700': !success}">
-            <p x-text="message"></p>
-        </div>
+        <!-- Message flottant supprimé -->
     </div>
     
     <div class="bg-white shadow-md rounded-lg p-6">
@@ -122,6 +150,11 @@
                         this.success = data.success;
                         this.message = data.message;
                         
+                        // Masquer le message après 5 secondes
+                        setTimeout(() => {
+                            this.message = '';
+                        }, 5000);
+                        
                         if (data.success) {
                             // Vider la liste des votes si réinitialisation réussie
                             this.votes = {};
@@ -131,6 +164,11 @@
                         this.success = false;
                         this.message = 'Erreur de connexion au serveur.';
                         console.error('Erreur:', error);
+                        
+                        // Masquer le message après 5 secondes
+                        setTimeout(() => {
+                            this.message = '';
+                        }, 5000);
                     })
                     .finally(() => {
                         this.processing = false;
@@ -158,6 +196,11 @@
                         this.success = data.success;
                         this.message = data.message;
                         
+                        // Masquer le message après 5 secondes
+                        setTimeout(() => {
+                            this.message = '';
+                        }, 5000);
+                        
                         if (data.success) {
                             // Supprimer le joueur de la liste locale
                             const updatedVotes = {...this.votes};
@@ -169,6 +212,11 @@
                         this.success = false;
                         this.message = 'Erreur de connexion au serveur.';
                         console.error('Erreur:', error);
+                        
+                        // Masquer le message après 5 secondes
+                        setTimeout(() => {
+                            this.message = '';
+                        }, 5000);
                     })
                     .finally(() => {
                         this.processing = false;
@@ -200,6 +248,11 @@
                         this.success = data.success;
                         this.message = data.message;
                         
+                        // Masquer le message après 5 secondes
+                        setTimeout(() => {
+                            this.message = '';
+                        }, 5000);
+                        
                         if (data.success) {
                             // Mettre à jour le joueur dans la liste locale
                             const updatedVotes = {...this.votes};
@@ -215,6 +268,11 @@
                         this.success = false;
                         this.message = 'Erreur de connexion au serveur.';
                         console.error('Erreur:', error);
+                        
+                        // Masquer le message après 5 secondes
+                        setTimeout(() => {
+                            this.message = '';
+                        }, 5000);
                     })
                     .finally(() => {
                         this.processing = false;
